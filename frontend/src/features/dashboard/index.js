@@ -12,9 +12,7 @@ export { default as SalesTrendChart } from './components/SalesTrendChart.jsx';
 export { default as SalesCategoryChart } from './components/SalesCategoryChart.jsx';
 export { default as TopProductsChart } from './components/TopProductsChart.jsx';
 export { default as PaymentMethodsChart } from './components/PaymentMethodsChart.jsx';
-export { default as LowStockTable } from './components/LowStockTable.jsx';
 export { default as RecentSalesTable } from './components/RecentSalesTable.jsx';
 export { default as QuickActions } from './components/QuickActions.jsx';
-export { default as RecentActivity } from './components/RecentActivity.jsx';
 
 export { default } from './pages/Dashboard.jsx';

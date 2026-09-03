@@ -16,10 +16,8 @@ import SalesTrendChart from '../components/SalesTrendChart.jsx';
 import SalesCategoryChart from '../components/SalesCategoryChart.jsx';
 import TopProductsChart from '../components/TopProductsChart.jsx';
 import PaymentMethodsChart from '../components/PaymentMethodsChart.jsx';
-import LowStockTable from '../components/LowStockTable.jsx';
 import RecentSalesTable from '../components/RecentSalesTable.jsx';
 import QuickActions from '../components/QuickActions.jsx';
-import RecentActivity from '../components/RecentActivity.jsx';
 
 import dashboardService from '../services/dashboardService.js';
 
@@ -39,9 +37,7 @@ export default function Dashboard() {
   const [categorySales, setCategorySales] = useState([]);
   const [topProducts, setTopProducts] = useState([]);
   const [paymentMethods, setPaymentMethods] = useState([]);
-  const [lowStock, setLowStock] = useState([]);
   const [recentSales, setRecentSales] = useState([]);
-  const [recentActivity, setRecentActivity] = useState([]);
 
   const fetchDashboardData = async () => {
     setLoading(true);
@@ -53,18 +49,14 @@ export default function Dashboard() {
         categoryRes,
         topProdRes,
         paymentsRes,
-        lowStockRes,
         salesRes,
-        activityRes,
       ] = await Promise.all([
         dashboardService.getDashboardSummary(),
         dashboardService.getSalesTrend(),
         dashboardService.getCategorySales(),
         dashboardService.getTopProducts(),
         dashboardService.getPaymentMethods(),
-        dashboardService.getLowStockItems(),
         dashboardService.getRecentSales(),
-        dashboardService.getRecentActivity(),
       ]);
 
       setSummary(summaryRes);
@@ -72,9 +64,7 @@ export default function Dashboard() {
       setCategorySales(categoryRes);
       setTopProducts(topProdRes);
       setPaymentMethods(paymentsRes);
-      setLowStock(lowStockRes);
       setRecentSales(salesRes);
-      setRecentActivity(activityRes);
     } catch (err) {
       console.error('[Dashboard Error]:', err);
       setError('Unable to load dashboard metrics. Please try again.');
@@ -211,23 +201,8 @@ export default function Dashboard() {
         <PaymentMethodsChart data={paymentMethods} loading={loading} />
       </div>
 
-      {/* 6. Operations & Activity Layout (8 cols + 4 cols on Desktop) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left Column (8 cols): Tables */}
-        <div className="lg:col-span-8 space-y-6">
-          {/* Section 7: Recent Sales */}
-          <RecentSalesTable sales={recentSales} loading={loading} />
-
-          {/* Section 6: Low Stock Items */}
-          <LowStockTable items={lowStock} loading={loading} />
-        </div>
-
-        {/* Right Column (4 cols): Feed */}
-        <div className="lg:col-span-4 space-y-6">
-          {/* Section 9: Recent Activity */}
-          <RecentActivity activities={recentActivity} loading={loading} />
-        </div>
-      </div>
+      {/* 6. Recent Sales Section */}
+      <RecentSalesTable sales={recentSales} loading={loading} />
     </div>
   );
 }
