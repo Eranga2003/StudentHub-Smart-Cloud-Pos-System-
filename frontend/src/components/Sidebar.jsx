@@ -78,9 +78,8 @@ const navStructure = [
     path: '/inventory',
     subPages: [
       { title: 'Stock Overview', path: '/inventory' },
-      { title: 'Stock In', path: '/inventory/stock-in' },
       { title: 'Low Stock', path: '/inventory/low-stock' },
-      { title: 'Stock Adjustment', path: '/inventory/adjustment' },
+      { title: 'Stock Out', path: '/inventory/out-of-stock' },
     ],
   },
   {
