@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <rect width="100" height="100" rx="22" fill="#0B3B60"/>
+  <!-- Modern POS / Book / Cloud Emblem -->
+  <path d="M24 64C24 55.1634 31.1634 48 40 48H50V76H40C31.1634 76 24 68.8366 24 64Z" fill="#FFFFFF" fill-opacity="0.95"/>
+  <path d="M76 64C76 55.1634 68.8366 48 60 48H50V76H60C68.8366 76 76 68.8366 76 64Z" fill="#43B02A"/>
+  <path d="M50 24L72 38L50 50L28 38L50 24Z" fill="#43B02A"/>
+  <circle cx="50" cy="37" r="4" fill="#FFFFFF"/>
+</svg>

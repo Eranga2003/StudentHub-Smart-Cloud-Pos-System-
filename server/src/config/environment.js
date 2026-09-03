@@ -14,12 +14,18 @@ export const env = {
   CLIENT_URL: process.env.CLIENT_URL || 'http://localhost:5173',
 
   firebase: {
-    projectId: process.env.FIREBASE_PROJECT_ID || '',
+    apiKey: process.env.FIREBASE_API_KEY || 'AIzaSyD1Frth3qU1GScyy2_NDUXtWUCLhEHeNHM',
+    authDomain: process.env.FIREBASE_AUTH_DOMAIN || 'student-hub-smart-pos-system.firebaseapp.com',
+    projectId: process.env.FIREBASE_PROJECT_ID || 'student-hub-smart-pos-system',
+    storageBucket: process.env.FIREBASE_STORAGE_BUCKET || 'student-hub-smart-pos-system.firebasestorage.app',
+    messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID || '421886562569',
+    appId: process.env.FIREBASE_APP_ID || '1:421886562569:web:b02ccb4385165dbcc003d8',
+    measurementId: process.env.FIREBASE_MEASUREMENT_ID || 'G-XS4B1NG7DR',
+
     clientEmail: process.env.FIREBASE_CLIENT_EMAIL || '',
     privateKey: process.env.FIREBASE_PRIVATE_KEY
       ? process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n')
       : '',
-    storageBucket: process.env.FIREBASE_STORAGE_BUCKET || '',
     serviceAccountKeyPath: process.env.FIREBASE_SERVICE_ACCOUNT_KEY_PATH || '',
   },
 

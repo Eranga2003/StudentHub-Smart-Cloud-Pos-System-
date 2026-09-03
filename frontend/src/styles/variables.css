@@ -1,0 +1,86 @@
+/* ==================================================
+   GLOBAL DESIGN SYSTEM — MANDATORY BRAND TOKENS
+   Student Hub Smart Cloud POS System
+   ================================================== */
+
+:root {
+  /* ==================================================
+     OFFICIAL BRAND COLORS (MANDATORY - DO NOT MODIFY)
+     ================================================== */
+  --color-primary: #0B3B60;    /* Navy Blue */
+  --color-secondary: #43B02A;  /* Green */
+  --color-white: #FFFFFF;      /* Pure White */
+
+  /* ==================================================
+     BRAND DERIVATIVES & SHADES
+     ================================================== */
+  --color-primary-hover: #082d49;
+  --color-primary-dark: #062033;
+  --color-primary-light: #124d7c;
+  --color-primary-subtle: rgba(11, 59, 96, 0.05);
+
+  --color-secondary-hover: #389823;
+  --color-secondary-dark: #2e7a1c;
+  --color-secondary-light: #52c736;
+  --color-secondary-subtle: rgba(67, 176, 42, 0.08);
+
+  /* Glass Navy Tokens for Sub-page & Secondary Navigation */
+  --color-glass-navy-bg: rgba(11, 59, 96, 0.07);
+  --color-glass-navy-border: rgba(11, 59, 96, 0.18);
+  --color-glass-navy-hover: rgba(11, 59, 96, 0.14);
+  --color-glass-navy-active: rgba(11, 59, 96, 0.22);
+
+  /* ==================================================
+     SEMANTIC APPLICATION VARIABLES
+     ================================================== */
+  --color-background: #F4F7FA;
+  --color-surface: #FFFFFF;
+  --color-surface-elevated: #FFFFFF;
+  --color-border: #E2E8F0;
+  --color-border-subtle: #EDF2F7;
+  --color-text-primary: #1A202C;
+  --color-text-secondary: #64748B;
+  --color-text-muted: #94A3B8;
+
+  --color-success: #43B02A;    /* Aligned with Brand Green */
+  --color-error: #DC2626;
+  --color-warning: #D97706;
+  --color-info: #0B3B60;       /* Aligned with Brand Navy */
+
+  /* ==================================================
+     TYPOGRAPHY TOKENS (Roboto Standard)
+     ================================================== */
+  --font-family-base: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-size-xs: 0.75rem;     /* 12px */
+  --font-size-sm: 0.875rem;    /* 14px */
+  --font-size-base: 1rem;      /* 16px */
+  --font-size-lg: 1.125rem;    /* 18px */
+  --font-size-xl: 1.25rem;     /* 20px */
+  --font-size-2xl: 1.5rem;     /* 24px */
+  --font-size-3xl: 1.875rem;   /* 30px */
+  --font-size-4xl: 2.25rem;    /* 36px */
+
+  --font-weight-light: 300;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-bold: 700;
+  --font-weight-black: 900;
+
+  /* ==================================================
+     SURFACE, RADIUS & SHADOW ELEVATIONS
+     ================================================== */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --radius-full: 9999px;
+
+  --shadow-subtle: 0 1px 3px rgba(0, 0, 0, 0.05);
+  --shadow-card: 0 4px 12px -1px rgba(11, 59, 96, 0.06);
+  --shadow-dropdown: 0 10px 25px -5px rgba(11, 59, 96, 0.12);
+  --shadow-modal: 0 25px 50px -12px rgba(11, 59, 96, 0.25);
+
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+}

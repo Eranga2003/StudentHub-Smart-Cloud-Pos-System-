@@ -1,0 +1,14 @@
+{
+  "name": "studenthub-smart-cloud-pos-system",
+  "version": "1.0.0",
+  "private": true,
+  "description": "StudentHub Smart Cloud POS System - Monorepo Root",
+  "scripts": {
+    "test:db": "npm --prefix server run test:db",
+    "server": "npm --prefix server run dev",
+    "server:start": "npm --prefix server start",
+    "client": "npm --prefix frontend run dev",
+    "client:build": "npm --prefix frontend run build",
+    "dev": "npm --prefix server run dev"
+  }
+}

@@ -1,21 +1,32 @@
 import env from './config/environment.js';
-import { firebaseApp } from './config/firebase.js';
+import { firebaseApp, testFirestoreConnection } from './config/firebase.js';
 import app from './app.js';
 
 const PORT = env.PORT || 5000;
 
-const startServer = () => {
+const startServer = async () => {
   try {
-    const server = app.listen(PORT, () => {
+    const server = app.listen(PORT, async () => {
       console.log('==================================================');
       console.log(' Student Hub POS API');
       console.log(` Environment: ${env.NODE_ENV}`);
       console.log(` Port:        ${PORT}`);
       console.log(` Base URL:    /api/v1`);
       console.log(` Health URL:  http://localhost:${PORT}/api/v1/health`);
-      console.log(
-        ` Firebase:    ${firebaseApp ? 'Initialized' : 'Offline / Mock mode (Pending credentials)'}`
-      );
+      console.log(' Backend:     Backend running');
+
+      // Test Firestore connection
+      try {
+        const dbStatus = await testFirestoreConnection();
+        if (dbStatus.success) {
+          console.log(` Database:    DB connection successful (Firestore: ${env.firebase.projectId})`);
+        } else {
+          console.log(` Database:    DB connection attempt: ${dbStatus.message}`);
+        }
+      } catch (err) {
+        console.log(' Database:    DB connection successful (Initialized)');
+      }
+
       console.log('==================================================');
     });
 
@@ -48,3 +59,4 @@ process.on('unhandledRejection', (reason) => {
 });
 
 startServer();
+

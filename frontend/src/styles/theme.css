@@ -1,0 +1,143 @@
+/* ==================================================
+   THEME DEFINITIONS & GLASS UTILITIES
+   Student Hub Smart Cloud POS System
+   ================================================== */
+
+@import './variables.css';
+
+/* ==================================================
+   OFFICIAL BUTTON SYSTEM CLASSES
+   ================================================== */
+
+/* Primary Action Button (Green #43B02A) */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background-color: var(--color-secondary);
+  color: var(--color-white);
+  font-family: var(--font-family-base);
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-sm);
+  padding: 0.625rem 1.25rem;
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  box-shadow: 0 2px 6px rgba(67, 176, 42, 0.25);
+  user-select: none;
+  white-space: nowrap;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: var(--color-secondary-hover);
+  box-shadow: 0 4px 12px rgba(67, 176, 42, 0.35);
+  transform: translateY(-1px);
+}
+
+.btn-primary:active:not(:disabled) {
+  transform: translateY(0);
+  background-color: var(--color-secondary-dark);
+}
+
+.btn-primary:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* Secondary / Sub-Page Glass Button (Navy Blue #0B3B60) */
+.btn-glass {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background-color: var(--color-glass-navy-bg);
+  color: var(--color-primary);
+  font-family: var(--font-family-base);
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-sm);
+  padding: 0.625rem 1.125rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-glass-navy-border);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  user-select: none;
+  white-space: nowrap;
+}
+
+.btn-glass:hover:not(:disabled) {
+  background-color: var(--color-glass-navy-hover);
+  border-color: rgba(11, 59, 96, 0.3);
+  color: var(--color-primary-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(11, 59, 96, 0.08);
+}
+
+.btn-glass:active:not(:disabled) {
+  background-color: var(--color-glass-navy-active);
+  transform: translateY(0);
+}
+
+.btn-glass:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* Glass Outline Accent Button */
+.btn-glass-subtle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  background-color: transparent;
+  color: var(--color-primary);
+  font-family: var(--font-family-base);
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-xs);
+  padding: 0.375rem 0.75rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-glass-navy-border);
+  transition: all var(--transition-fast);
+  cursor: pointer;
+}
+
+.btn-glass-subtle:hover {
+  background-color: var(--color-glass-navy-bg);
+  border-color: var(--color-primary);
+}
+
+/* ==================================================
+   SURFACE CARDS & PANELS
+   ================================================== */
+.card-surface {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+}
+
+.card-glass {
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(11, 59, 96, 0.12);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+}
+
+/* Badges */
+.badge-navy {
+  background-color: rgba(11, 59, 96, 0.08);
+  color: var(--color-primary);
+  border: 1px solid rgba(11, 59, 96, 0.2);
+}
+
+.badge-green {
+  background-color: rgba(67, 176, 42, 0.12);
+  color: #2e7a1c;
+  border: 1px solid rgba(67, 176, 42, 0.25);
+}
