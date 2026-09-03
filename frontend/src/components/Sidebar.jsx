@@ -89,17 +89,6 @@ const navStructure = [
     subPages: [
       { title: 'Sales History', path: '/sales' },
       { title: 'Invoices', path: '/sales/invoices' },
-      { title: 'Returns & Refunds', path: '/sales/returns' },
-    ],
-  },
-  {
-    title: 'Purchases',
-    icon: Truck,
-    path: '/purchases',
-    subPages: [
-      { title: 'New Purchase', path: '/purchases/new' },
-      { title: 'Purchase History', path: '/purchases' },
-      { title: 'Suppliers', path: '/suppliers' },
     ],
   },
   {
@@ -128,28 +117,16 @@ const navStructure = [
     title: 'Employees',
     icon: UserCheck,
     path: '/employees',
-    subPages: [
-      { title: 'Employees', path: '/employees' },
-      { title: 'Roles & Permissions', path: '/employees/roles' },
-      { title: 'Activity Logs', path: '/employees/logs' },
-    ],
   },
   {
     title: 'Notifications',
     icon: Bell,
     path: '/notifications',
-    badge: '3',
   },
   {
     title: 'Settings',
     icon: Settings,
     path: '/settings',
-  },
-  {
-    title: 'Design System',
-    icon: Palette,
-    path: '/design-system',
-    special: true,
   },
 ];
 

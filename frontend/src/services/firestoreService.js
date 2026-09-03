@@ -4,6 +4,8 @@ import {
   addDoc,
   updateDoc,
   deleteDoc,
+  getDoc,
+  setDoc,
   doc,
   serverTimestamp,
   query,
@@ -261,6 +263,59 @@ export const firestoreService = {
       return { id: docRef.id, ...employee };
     } catch (error) {
       console.error('[Firestore] addEmployee error:', error.message);
+      throw error;
+    }
+  },
+
+  // ==================== STORE SETTINGS & BILLING DETAILS ====================
+  async getStoreSettings() {
+    try {
+      const docRef = doc(db, 'settings', 'store_details');
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        return docSnap.data();
+      }
+      return {
+        storeName: 'Student Hub POS',
+        branch: 'Campus Branch #01',
+        address: 'University Complex, Colombo 03',
+        phone: '+94 11 258 7777',
+        currency: 'LKR',
+        printerWidth: '80mm',
+        studentDiscountRate: '5',
+        receiptHeader: 'Official Student Hub Store Receipt',
+        receiptFooter: 'Thank you for shopping at Student Hub! Please visit again.',
+      };
+    } catch (error) {
+      console.error('[Firestore] getStoreSettings error:', error.message);
+      return {
+        storeName: 'Student Hub POS',
+        branch: 'Campus Branch #01',
+        address: 'University Complex, Colombo 03',
+        phone: '+94 11 258 7777',
+        currency: 'LKR',
+        printerWidth: '80mm',
+        studentDiscountRate: '5',
+        receiptHeader: 'Official Student Hub Store Receipt',
+        receiptFooter: 'Thank you for shopping at Student Hub! Please visit again.',
+      };
+    }
+  },
+
+  async saveStoreSettings(settings) {
+    try {
+      const docRef = doc(db, 'settings', 'store_details');
+      await setDoc(
+        docRef,
+        {
+          ...settings,
+          updatedAt: serverTimestamp(),
+        },
+        { merge: true }
+      );
+      return settings;
+    } catch (error) {
+      console.error('[Firestore] saveStoreSettings error:', error.message);
       throw error;
     }
   },

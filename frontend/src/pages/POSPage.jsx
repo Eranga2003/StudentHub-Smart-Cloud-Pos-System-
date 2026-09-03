@@ -42,6 +42,8 @@ export default function POSPage() {
   const [paymentMethod, setPaymentMethod] = useState('cash');
   const [saleSuccess, setSaleSuccess] = useState(null);
   const [savingSale, setSavingSale] = useState(false);
+  const [storeSettings, setStoreSettings] = useState(null);
+  const [completedReceipt, setCompletedReceipt] = useState(null);
 
   // Load real catalog from Firestore
   const loadCatalog = async () => {
@@ -68,6 +70,7 @@ export default function POSPage() {
 
   useEffect(() => {
     loadCatalog();
+    firestoreService.getStoreSettings().then(setStoreSettings).catch(() => {});
 
     // Pick up custom service jobs transferred from the Services calculator
     try {
@@ -146,8 +149,12 @@ export default function POSPage() {
 
     const saleRecord = {
       invoiceNo: invoiceNumber,
-      customer: studentDiscountApplied ? 'Campus Student (5% Disc)' : 'Walk-in Customer',
-      cashier: 'Eranga C. (Counter #01)',
+      customer: studentDiscountApplied ? 'Campus Student' : 'Walk-in Customer',
+      cashier: 'Terminal Cashier',
+      storeName: storeSettings?.storeName || 'Student Hub POS',
+      branch: storeSettings?.branch || 'Campus Branch #01',
+      address: storeSettings?.address || 'University Complex, Colombo 03',
+      phone: storeSettings?.phone || '+94 11 258 7777',
       items: cart.map((item) => ({
         id: item.id,
         name: item.name,
@@ -165,9 +172,11 @@ export default function POSPage() {
     try {
       await firestoreService.addSale(saleRecord);
       setSaleSuccess(`Invoice ${invoiceNumber} saved to Cloud Firestore!`);
+      setCompletedReceipt(saleRecord);
     } catch (err) {
       console.warn('Saved locally (Firestore write notice):', err.message);
       setSaleSuccess(`Invoice ${invoiceNumber} recorded!`);
+      setCompletedReceipt(saleRecord);
     } finally {
       setSavingSale(false);
       setIsCheckoutOpen(false);
@@ -500,7 +509,84 @@ export default function POSPage() {
                 ) : (
                   <Check className="w-4 h-4" />
                 )}
-                <span>{savingSale ? 'Saving...' : 'Confirm'}</span>
+                <span>{savingSale ? 'Saving...' : 'Confirm & Bill'}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* COMPLETED BILL / RECEIPT POPUP (USING REAL STORE DETAILS STORED IN FIRESTORE DB) */}
+      {completedReceipt && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-sm w-full p-6 border border-slate-200 shadow-2xl space-y-4 font-mono text-xs animate-in fade-in zoom-in-95">
+            <div className="text-center pb-3 border-b border-dashed border-slate-300 space-y-1">
+              <h2 className="text-base font-black text-[#0B3B60] font-sans">
+                {completedReceipt.storeName}
+              </h2>
+              <p className="text-[11px] text-slate-500 font-sans">{completedReceipt.branch}</p>
+              <p className="text-[10px] text-slate-500 font-sans">{completedReceipt.address}</p>
+              <p className="text-[10px] text-slate-500 font-sans">Tel: {completedReceipt.phone}</p>
+            </div>
+
+            <div className="space-y-1 text-[11px] text-slate-600">
+              <div className="flex justify-between">
+                <span>Invoice #:</span>
+                <span className="font-bold text-slate-800">{completedReceipt.invoiceNo}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Date:</span>
+                <span>{new Date().toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Payment:</span>
+                <span className="font-bold">{completedReceipt.method}</span>
+              </div>
+            </div>
+
+            <div className="border-t border-b border-dashed border-slate-300 py-2 space-y-1.5">
+              {completedReceipt.items.map((it, idx) => (
+                <div key={idx} className="flex justify-between text-[11px]">
+                  <span>{it.name} x {it.quantity}</span>
+                  <span className="font-bold">LKR {(it.price * it.quantity).toFixed(2)}</span>
+                </div>
+              ))}
+            </div>
+
+            <div className="space-y-1 text-[11px]">
+              <div className="flex justify-between text-slate-600">
+                <span>Subtotal:</span>
+                <span>LKR {completedReceipt.subtotal.toFixed(2)}</span>
+              </div>
+              {completedReceipt.discount > 0 && (
+                <div className="flex justify-between text-[#43B02A] font-bold">
+                  <span>Student Discount:</span>
+                  <span>- LKR {completedReceipt.discount.toFixed(2)}</span>
+                </div>
+              )}
+              <div className="flex justify-between text-sm font-black text-[#0B3B60] pt-1 border-t border-slate-200">
+                <span>TOTAL PAID:</span>
+                <span>LKR {completedReceipt.total.toFixed(2)}</span>
+              </div>
+            </div>
+
+            <div className="text-center pt-2 text-[10px] text-slate-400 font-sans">
+              {storeSettings?.receiptFooter || 'Thank you for shopping at Student Hub!'}
+            </div>
+
+            <div className="flex items-center gap-2 pt-2">
+              <button
+                onClick={() => setCompletedReceipt(null)}
+                className="btn-glass flex-1 justify-center py-2 text-xs font-sans"
+              >
+                <span>Close</span>
+              </button>
+              <button
+                onClick={() => window.print()}
+                className="btn-primary flex-1 justify-center py-2 text-xs font-sans"
+              >
+                <Printer className="w-3.5 h-3.5" />
+                <span>Print Bill</span>
               </button>
             </div>
           </div>

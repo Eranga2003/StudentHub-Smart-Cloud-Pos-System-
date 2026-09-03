@@ -17,7 +17,6 @@ import ReportsPage from './pages/ReportsPage.jsx';
 import EmployeesPage from './pages/EmployeesPage.jsx';
 import NotificationsPage from './pages/NotificationsPage.jsx';
 import SettingsPage from './pages/SettingsPage.jsx';
-import DesignSystemPage from './pages/DesignSystemPage.jsx';
 
 export default function App() {
   return (
@@ -69,9 +68,6 @@ export default function App() {
 
           {/* Settings & Hardware Configuration */}
           <Route path="settings" element={<SettingsPage />} />
-
-          {/* Living Design System Showroom */}
-          <Route path="design-system" element={<DesignSystemPage />} />
 
           {/* Fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />

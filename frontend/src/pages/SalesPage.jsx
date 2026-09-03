@@ -46,8 +46,6 @@ export default function SalesPage() {
   useEffect(() => {
     if (subTab === 'invoices') {
       setActiveTab('invoices');
-    } else if (subTab === 'returns') {
-      setActiveTab('returns');
     } else {
       setActiveTab('history');
     }
@@ -60,9 +58,6 @@ export default function SalesPage() {
       invId.toLowerCase().includes(search.toLowerCase()) ||
       cust.toLowerCase().includes(search.toLowerCase());
 
-    if (activeTab === 'returns') {
-      return matchesSearch && s.status === 'Refunded';
-    }
     return matchesSearch;
   });
 
@@ -96,7 +91,6 @@ export default function SalesPage() {
         {[
           { id: 'history', label: 'Sales History', path: '/sales' },
           { id: 'invoices', label: 'Invoices & Receipts', path: '/sales/invoices' },
-          { id: 'returns', label: 'Returns & Refunds', path: '/sales/returns' },
         ].map((tab) => {
           const isSelected = activeTab === tab.id;
           return (

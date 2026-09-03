@@ -26,10 +26,10 @@ export default function NotificationsPage() {
           const isOut = Number(p.stock || 0) === 0;
           return {
             id: p.id,
-            title: isOut ? `Out of Stock: ${p.name}` : `Low Stock Alert: ${p.name}`,
+            title: isOut ? `Out of Stock: ${p.name}` : `Low Stock: ${p.name}`,
             desc: isOut
-              ? `SKU ${p.sku || 'N/A'} has 0 units remaining. Replenish immediately.`
-              : `Only ${p.stock} units remaining in inventory (Threshold: 5 units).`,
+              ? `Item "${p.name}" (SKU: ${p.sku || 'N/A'}) has 0 units remaining. Replenish immediately.`
+              : `Item "${p.name}" (SKU: ${p.sku || 'N/A'}) has only ${p.stock} units remaining in inventory.`,
             time: 'Live Alert',
             type: isOut ? 'error' : 'warning',
             read: false,
