@@ -32,55 +32,7 @@ export default function RecentActivity({ activities = [], loading = false }) {
     );
   }
 
-  const defaultActivities = [
-    {
-      id: 'a1',
-      type: 'sale',
-      title: 'New sale completed',
-      description: 'Invoice #INV-2026-092 for LKR 1,240.00 (Cash)',
-      time: '5 mins ago',
-      color: 'text-[#43B02A]',
-      bg: 'bg-[#43B02A]/10',
-    },
-    {
-      id: 'a2',
-      type: 'product',
-      title: 'Product added',
-      description: 'Atlas Chooty Gel Pen (0.5mm) added to catalog',
-      time: '24 mins ago',
-      color: 'text-[#0B3B60]',
-      bg: 'bg-[#0B3B60]/10',
-    },
-    {
-      id: 'a3',
-      type: 'stock',
-      title: 'Stock received',
-      description: '50 units of A4 Copier Paper 80GSM restocked',
-      time: '1 hour ago',
-      color: 'text-indigo-600',
-      bg: 'bg-indigo-50',
-    },
-    {
-      id: 'a4',
-      type: 'customer',
-      title: 'Customer added',
-      description: 'Sandun Jayasuriya (ID: ST-2088) registered for discounts',
-      time: '2 hours ago',
-      color: 'text-sky-600',
-      bg: 'bg-sky-50',
-    },
-    {
-      id: 'a5',
-      type: 'refund',
-      title: 'Refund processed',
-      description: 'LKR 850.00 refunded for defective USB cable (#INV-2026-088)',
-      time: '4 hours ago',
-      color: 'text-rose-600',
-      bg: 'bg-rose-50',
-    },
-  ];
-
-  const list = activities.length > 0 ? activities : defaultActivities;
+  const list = activities;
 
   const getActivityIcon = (type) => {
     switch (type) {
@@ -115,8 +67,15 @@ export default function RecentActivity({ activities = [], loading = false }) {
         <span className="w-2.5 h-2.5 rounded-full bg-[#43B02A] animate-pulse" title="Live stream active"></span>
       </div>
 
-      {/* Activity Timeline List */}
-      <div className="space-y-3 divide-y divide-slate-100">
+      {/* Activity Timeline List or Empty State */}
+      {list.length === 0 ? (
+        <div className="py-8 text-center text-slate-400 space-y-2">
+          <Activity className="w-8 h-8 mx-auto opacity-30" />
+          <p className="text-xs font-semibold text-slate-700">No Recent Activity</p>
+          <p className="text-[11px] text-slate-400">Events from sales and inventory will appear here.</p>
+        </div>
+      ) : (
+        <div className="space-y-3 divide-y divide-slate-100">
         {list.map((act) => (
           <div key={act.id} className="pt-2.5 first:pt-0 flex items-start gap-3 group">
             <div className={`w-8 h-8 rounded-lg ${act.bg || 'bg-slate-100'} ${act.color || 'text-slate-600'} flex items-center justify-center shrink-0 mt-0.5 transition-transform group-hover:scale-105`}>
@@ -140,6 +99,7 @@ export default function RecentActivity({ activities = [], loading = false }) {
           </div>
         ))}
       </div>
+      )}
 
       {/* Footer */}
       <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">

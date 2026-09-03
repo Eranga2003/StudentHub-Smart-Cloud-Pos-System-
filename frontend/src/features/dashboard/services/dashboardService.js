@@ -1,299 +1,419 @@
 /**
- * Dashboard Service
+ * Dashboard Service (Cloud Firestore DB Live Integration)
  *
- * Provides mock data for the StudentHub POS Dashboard.
- * Architecture Note:
- * Each function returns a Promise simulating an API latency.
- * When the Express backend endpoints are ready, simply replace the mock responses
- * with axios/fetch calls to:
- *   - GET /api/v1/dashboard/summary
- *   - GET /api/v1/dashboard/sales-trend
- *   - GET /api/v1/dashboard/category-sales
- *   - GET /api/v1/dashboard/top-products
- *   - GET /api/v1/dashboard/payment-methods
- *   - GET /api/v1/dashboard/low-stock
- *   - GET /api/v1/dashboard/recent-sales
- *   - GET /api/v1/dashboard/activity
+ * Fetches real user-input records directly from Cloud Firestore:
+ * - products
+ * - sales
+ * - customers
+ * - expenses
+ * Computes live KPIs, 7-day sales trends, category splits, velocity, tender methods,
+ * low stock alerts, recent transactions, and activity telemetry directly from DB.
  */
+
+import { firestoreService } from '../../../services/firestoreService.js';
 
 export const dashboardService = {
   /**
-   * 1. TOP SUMMARY CARDS (6 KPIs)
-   * GET /api/v1/dashboard/summary
+   * Helper: Load all required collections in parallel from Firestore
+   */
+  async _getLiveStoreData() {
+    try {
+      const [products, sales, customers, expenses] = await Promise.all([
+        firestoreService.getProducts().catch(() => []),
+        firestoreService.getSales().catch(() => []),
+        firestoreService.getCustomers().catch(() => []),
+        firestoreService.getExpenses().catch(() => []),
+      ]);
+      return { products, sales, customers, expenses };
+    } catch (err) {
+      console.error('[DashboardService] Firestore DB fetch error:', err);
+      return { products: [], sales: [], customers: [], expenses: [] };
+    }
+  },
+
+  /**
+   * 1. TOP SUMMARY CARDS (6 KPIs from Real Firestore DB)
    */
   async getDashboardSummary() {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve({
-          todaySales: {
-            title: "Today's Sales",
-            value: 48250.0,
-            formatted: 'LKR 48,250.00',
-            change: '+14.2%',
-            comparison: 'vs yesterday',
-            isPositive: true,
-            type: 'currency',
-          },
-          todayProfit: {
-            title: "Today's Profit",
-            value: 16840.0,
-            formatted: 'LKR 16,840.00',
-            change: '+8.6%',
-            comparison: 'vs yesterday',
-            isPositive: true,
-            type: 'currency',
-          },
-          todayTransactions: {
-            title: "Today's Transactions",
-            value: 142,
-            formatted: '142 Orders',
-            change: '+18 orders',
-            comparison: 'vs yesterday',
-            isPositive: true,
-            type: 'count',
-          },
-          totalProducts: {
-            title: 'Total Products',
-            value: 386,
-            formatted: '386 SKUs',
-            change: '+4 new',
-            comparison: 'catalog items',
-            isPositive: true,
-            type: 'count',
-          },
-          lowStockItems: {
-            title: 'Low Stock Items',
-            value: 7,
-            formatted: '7 Items',
-            change: '3 critical',
-            comparison: 'requires restock',
-            isPositive: false,
-            type: 'alert',
-          },
-          totalCustomers: {
-            title: 'Total Customers',
-            value: 1248,
-            formatted: '1,248 Students',
-            change: '+24 new',
-            comparison: 'this month',
-            isPositive: true,
-            type: 'count',
-          },
-        });
-      }, 150);
+    const { products, sales, customers, expenses } = await this._getLiveStoreData();
+
+    // Today's Date String (YYYY-MM-DD)
+    const todayStr = new Date().toISOString().split('T')[0];
+
+    // Filter today's sales
+    const todaySalesList = sales.filter((s) => {
+      if (!s.date) return true; // Include recent if date not specified
+      return s.date.startsWith(todayStr);
     });
+
+    const todaySalesTotal = todaySalesList.reduce((acc, s) => acc + Number(s.total || 0), 0);
+    const allSalesTotal = sales.reduce((acc, s) => acc + Number(s.total || 0), 0);
+    const displaySales = todaySalesTotal > 0 ? todaySalesTotal : allSalesTotal;
+
+    // Calculate profit: Total Revenue minus Total Expenses (or standard margin)
+    const expensesTotal = expenses.reduce((acc, e) => acc + Number(e.amount || 0), 0);
+    const profit = Math.max(0, displaySales - expensesTotal);
+
+    // Low stock items (stock <= 5 units)
+    const lowStockList = products.filter((p) => Number(p.stock || 0) <= 5);
+    const criticalStockCount = products.filter((p) => Number(p.stock || 0) <= 2).length;
+
+    return {
+      todaySales: {
+        title: "Today's Sales",
+        value: displaySales,
+        formatted: `LKR ${displaySales.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+        change: sales.length > 0 ? `${sales.length} total orders` : 'No orders yet',
+        comparison: 'from Cloud Firestore',
+        isPositive: true,
+        type: 'currency',
+      },
+      todayProfit: {
+        title: "Today's Profit",
+        value: profit,
+        formatted: `LKR ${profit.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+        change: expenses.length > 0 ? `${expenses.length} expenses logged` : 'Net operational',
+        comparison: 'net margin in DB',
+        isPositive: true,
+        type: 'currency',
+      },
+      todayTransactions: {
+        title: "Today's Transactions",
+        value: todaySalesList.length || sales.length,
+        formatted: `${todaySalesList.length || sales.length} Orders`,
+        change: sales.length > 0 ? 'Live POS receipts' : 'Waiting for sales',
+        comparison: 'recorded in DB',
+        isPositive: true,
+        type: 'count',
+      },
+      totalProducts: {
+        title: 'Total Products',
+        value: products.length,
+        formatted: `${products.length} SKUs`,
+        change: `${products.length} active in DB`,
+        comparison: 'catalog inventory',
+        isPositive: true,
+        type: 'count',
+      },
+      lowStockItems: {
+        title: 'Low Stock Items',
+        value: lowStockList.length,
+        formatted: `${lowStockList.length} Items`,
+        change: `${criticalStockCount} critical (≤ 2)`,
+        comparison: 'stock ≤ 5 units',
+        isPositive: lowStockList.length === 0,
+        type: 'alert',
+      },
+      totalCustomers: {
+        title: 'Total Customers',
+        value: customers.length,
+        formatted: `${customers.length} Students`,
+        change: `${customers.length} profiles`,
+        comparison: 'registered in DB',
+        isPositive: true,
+        type: 'count',
+      },
+    };
   },
 
   /**
-   * 2. SALES TREND (Last 7 Days)
-   * GET /api/v1/dashboard/sales-trend
+   * 2. SALES TREND (Last 7 Days from Real Firestore DB)
    */
   async getSalesTrend() {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve([
-          { day: 'Monday', short: 'Mon', sales: 34500, orders: 98, profit: 12100 },
-          { day: 'Tuesday', short: 'Tue', sales: 42100, orders: 115, profit: 14800 },
-          { day: 'Wednesday', short: 'Wed', sales: 38900, orders: 104, profit: 13600 },
-          { day: 'Thursday', short: 'Thu', sales: 46700, orders: 128, profit: 16400 },
-          { day: 'Friday', short: 'Fri', sales: 58200, orders: 165, profit: 20500 },
-          { day: 'Saturday', short: 'Sat', sales: 52400, orders: 148, profit: 18300 },
-          { day: 'Sunday', short: 'Sun', sales: 48250, orders: 142, profit: 16840 },
-        ]);
-      }, 150);
+    const { sales } = await this._getLiveStoreData();
+
+    const daysMap = [
+      { day: 'Monday', short: 'Mon', sales: 0, orders: 0 },
+      { day: 'Tuesday', short: 'Tue', sales: 0, orders: 0 },
+      { day: 'Wednesday', short: 'Wed', sales: 0, orders: 0 },
+      { day: 'Thursday', short: 'Thu', sales: 0, orders: 0 },
+      { day: 'Friday', short: 'Fri', sales: 0, orders: 0 },
+      { day: 'Saturday', short: 'Sat', sales: 0, orders: 0 },
+      { day: 'Sunday', short: 'Sun', sales: 0, orders: 0 },
+    ];
+
+    // Map sales dates to day of week
+    sales.forEach((s) => {
+      let saleDate = new Date();
+      if (s.date) {
+        const parsed = new Date(s.date);
+        if (!isNaN(parsed.getTime())) saleDate = parsed;
+      }
+      // getDay: 0 is Sunday, 1 is Monday... 6 is Saturday
+      const dayIndex = saleDate.getDay();
+      const mappedIndex = dayIndex === 0 ? 6 : dayIndex - 1; // Map Sunday to 6, Monday to 0
+
+      if (daysMap[mappedIndex]) {
+        daysMap[mappedIndex].sales += Number(s.total || 0);
+        daysMap[mappedIndex].orders += 1;
+      }
     });
+
+    return daysMap;
   },
 
   /**
-   * 3. SALES BY CATEGORY
-   * GET /api/v1/dashboard/category-sales
+   * 3. SALES BY CATEGORY (Aggregated from Real Sales in DB)
    */
   async getCategorySales() {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve([
-          { category: 'Books', sales: 124500, share: 32, itemsSold: 285, color: '#0B3B60' },
-          { category: 'Stationery', sales: 98200, share: 25, itemsSold: 540, color: '#43B02A' },
-          { category: 'Snacks & Chocolates', sales: 62400, share: 16, itemsSold: 310, color: '#F59E0B' },
-          { category: 'Drinks', sales: 44300, share: 11, itemsSold: 220, color: '#3B82F6' },
-          { category: 'Ice Cream', sales: 31800, share: 8, itemsSold: 180, color: '#EC4899' },
-          { category: 'USB & Mobile Accessories', sales: 28800, share: 8, itemsSold: 45, color: '#8B5CF6' },
-        ]);
-      }, 150);
+    const { products, sales } = await this._getLiveStoreData();
+
+    // Standard POS Categories
+    const categoryTotals = {
+      'Books': 0,
+      'Stationery': 0,
+      'Snacks & Chocolates': 0,
+      'Drinks': 0,
+      'Ice Cream': 0,
+      'USB & Mobile Accessories': 0,
+    };
+
+    // Product Category Lookup Map
+    const prodCatMap = {};
+    products.forEach((p) => {
+      prodCatMap[p.id] = p.category;
+      if (p.name) prodCatMap[p.name.toLowerCase()] = p.category;
+    });
+
+    // Aggregate real sales items
+    sales.forEach((s) => {
+      if (Array.isArray(s.items)) {
+        s.items.forEach((item) => {
+          const itemTotal = (Number(item.price) || 0) * (Number(item.quantity) || 1);
+          let cat = item.category;
+
+          if (!cat && item.id && prodCatMap[item.id]) {
+            cat = prodCatMap[item.id];
+          }
+          if (!cat && item.name && prodCatMap[item.name.toLowerCase()]) {
+            cat = prodCatMap[item.name.toLowerCase()];
+          }
+
+          // Fallback matching
+          if (!cat) {
+            const nameLower = (item.name || '').toLowerCase();
+            if (nameLower.includes('book') || nameLower.includes('novel')) cat = 'Books';
+            else if (nameLower.includes('pen') || nameLower.includes('paper') || nameLower.includes('print')) cat = 'Stationery';
+            else if (nameLower.includes('choco') || nameLower.includes('snack')) cat = 'Snacks & Chocolates';
+            else if (nameLower.includes('drink') || nameLower.includes('beverage')) cat = 'Drinks';
+            else if (nameLower.includes('ice') || nameLower.includes('cream')) cat = 'Ice Cream';
+            else if (nameLower.includes('usb') || nameLower.includes('cable')) cat = 'USB & Mobile Accessories';
+            else cat = 'Stationery';
+          }
+
+          if (categoryTotals[cat] !== undefined) {
+            categoryTotals[cat] += itemTotal;
+          } else {
+            categoryTotals['Stationery'] += itemTotal;
+          }
+        });
+      }
+    });
+
+    const totalCategoryRevenue = Object.values(categoryTotals).reduce((sum, val) => sum + val, 0);
+
+    const colors = {
+      'Books': '#0B3B60',
+      'Stationery': '#43B02A',
+      'Snacks & Chocolates': '#F59E0B',
+      'Drinks': '#3B82F6',
+      'Ice Cream': '#EC4899',
+      'USB & Mobile Accessories': '#8B5CF6',
+    };
+
+    return Object.keys(categoryTotals).map((cat) => {
+      const salesVal = categoryTotals[cat];
+      const share = totalCategoryRevenue > 0 ? Math.round((salesVal / totalCategoryRevenue) * 100) : 0;
+      return {
+        category: cat,
+        sales: salesVal,
+        share,
+        color: colors[cat] || '#0B3B60',
+      };
     });
   },
 
   /**
-   * 4. TOP SELLING PRODUCTS
-   * GET /api/v1/dashboard/top-products
+   * 4. TOP SELLING PRODUCTS (Aggregated from Real Sales in DB)
    */
   async getTopProducts() {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve([
-          { id: 1, name: 'Exercise Book (120 Pages Ruled)', category: 'Books', quantity: 185, revenue: 38850, stock: 64 },
-          { id: 2, name: 'Blue Gel Pen (0.5mm Point)', category: 'Stationery', quantity: 142, revenue: 7100, stock: 120 },
-          { id: 3, name: 'A4 Copier Paper 80GSM Ream', category: 'Stationery', quantity: 98, revenue: 147000, stock: 18 },
-          { id: 4, name: 'Popular Novel (Student Edition)', category: 'Books', quantity: 64, revenue: 38400, stock: 22 },
-          { id: 5, name: 'High-Speed USB Cable (Type-C)', category: 'USB & Mobile Accessories', quantity: 52, revenue: 41600, stock: 14 },
-        ]);
-      }, 150);
+    const { sales, products } = await this._getLiveStoreData();
+
+    const productSalesMap = {};
+
+    sales.forEach((s) => {
+      if (Array.isArray(s.items)) {
+        s.items.forEach((item) => {
+          const name = item.name || 'Product';
+          const qty = Number(item.quantity) || 1;
+          const price = Number(item.price) || 0;
+
+          if (!productSalesMap[name]) {
+            productSalesMap[name] = {
+              id: item.id || name,
+              name,
+              category: item.category || 'General',
+              quantity: 0,
+              revenue: 0,
+            };
+          }
+          productSalesMap[name].quantity += qty;
+          productSalesMap[name].revenue += price * qty;
+        });
+      }
     });
+
+    const sortedList = Object.values(productSalesMap).sort((a, b) => b.quantity - a.quantity);
+
+    // If sales have occurred, return top 5
+    if (sortedList.length > 0) {
+      return sortedList.slice(0, 5);
+    }
+
+    // If no sales have occurred yet, show catalog products with 0 sold
+    return products.slice(0, 5).map((p, idx) => ({
+      id: p.id || idx,
+      name: p.name,
+      category: p.category || 'General',
+      quantity: 0,
+      revenue: 0,
+    }));
   },
 
   /**
-   * 5. PAYMENT METHODS
-   * GET /api/v1/dashboard/payment-methods
+   * 5. PAYMENT METHODS (Calculated from Real Sales in DB)
    */
   async getPaymentMethods() {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve([
-          { method: 'Cash', percentage: 58, amount: 27985, count: 88, color: '#43B02A' },
-          { method: 'Card', percentage: 32, amount: 15440, count: 42, color: '#0B3B60' },
-          { method: 'Bank Transfer', percentage: 10, amount: 4825, count: 12, color: '#F59E0B' },
-        ]);
-      }, 150);
+    const { sales } = await this._getLiveStoreData();
+
+    const totals = {
+      Cash: 0,
+      Card: 0,
+      'Bank Transfer': 0,
+    };
+
+    sales.forEach((s) => {
+      const method = (s.method || 'CASH').toUpperCase();
+      const amount = Number(s.total || 0);
+
+      if (method.includes('CASH')) totals.Cash += amount;
+      else if (method.includes('CARD')) totals.Card += amount;
+      else totals['Bank Transfer'] += amount;
     });
+
+    const allRevenue = totals.Cash + totals.Card + totals['Bank Transfer'];
+
+    return [
+      {
+        method: 'Cash',
+        percentage: allRevenue > 0 ? Math.round((totals.Cash / allRevenue) * 100) : 0,
+        amount: totals.Cash,
+        color: '#43B02A',
+      },
+      {
+        method: 'Card',
+        percentage: allRevenue > 0 ? Math.round((totals.Card / allRevenue) * 100) : 0,
+        amount: totals.Card,
+        color: '#0B3B60',
+      },
+      {
+        method: 'Bank Transfer',
+        percentage: allRevenue > 0 ? Math.round((totals['Bank Transfer'] / allRevenue) * 100) : 0,
+        amount: totals['Bank Transfer'],
+        color: '#F59E0B',
+      },
+    ];
   },
 
   /**
-   * 6. LOW STOCK SECTION
-   * GET /api/v1/dashboard/low-stock
+   * 6. LOW STOCK ITEMS (Filtered from Real Products in DB: stock <= 5)
    */
   async getLowStockItems() {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve([
-          { id: '1', name: 'Scientific Calculator fx-991EX', sku: 'EL-CAS-991', category: 'Stationery', currentStock: 2, minStock: 10, status: 'Critical', unitCost: 5900 },
-          { id: '2', name: 'Elephant House Wonder Bar', sku: 'IC-WON-01', category: 'Ice Cream', currentStock: 1, minStock: 15, status: 'Critical', unitCost: 110 },
-          { id: '3', name: 'CR Book 200 Pages Ruled', sku: 'BK-CR-200', category: 'Books', currentStock: 4, minStock: 20, status: 'Low', unitCost: 320 },
-          { id: '4', name: 'SanDisk 64GB USB 3.0 Flash', sku: 'AC-USB-64G', category: 'USB & Mobile Accessories', currentStock: 3, minStock: 12, status: 'Low', unitCost: 1850 },
-          { id: '5', name: 'Graph Book 80 Pages A4', sku: 'BK-GRP-80', category: 'Books', currentStock: 5, minStock: 25, status: 'Low', unitCost: 150 },
-        ]);
-      }, 150);
-    });
+    const { products } = await this._getLiveStoreData();
+
+    return products
+      .filter((p) => Number(p.stock || 0) <= 5)
+      .map((p) => ({
+        id: p.id,
+        name: p.name,
+        sku: p.sku || 'N/A',
+        category: p.category || 'General',
+        currentStock: Number(p.stock || 0),
+        minStock: Number(p.reorderLevel) || 5,
+        status: Number(p.stock || 0) <= 2 ? 'Critical' : 'Low',
+        unitCost: Number(p.costPrice || 0),
+      }));
   },
 
   /**
-   * 7. RECENT SALES
-   * GET /api/v1/dashboard/recent-sales
+   * 7. RECENT SALES (Real Transactions from DB)
    */
   async getRecentSales() {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve([
-          {
-            id: '1',
-            invoiceNo: 'INV-2026-092',
-            customer: 'Kasun Bandara (ST-1044)',
-            items: 'CR Book 120p (x2), Gel Pen Box',
-            method: 'Cash',
-            total: 1240.0,
-            date: 'Today 14:28',
-            status: 'Completed',
-          },
-          {
-            id: '2',
-            invoiceNo: 'INV-2026-091',
-            customer: 'Nimali Senanayake',
-            items: 'Scientific Calculator fx-991EX',
-            method: 'Card',
-            total: 6900.0,
-            date: 'Today 13:50',
-            status: 'Completed',
-          },
-          {
-            id: '3',
-            invoiceNo: 'INV-2026-090',
-            customer: 'Walk-in Student',
-            items: 'A4 Color Printing (35 pgs)',
-            method: 'Cash',
-            total: 875.0,
-            date: 'Today 12:45',
-            status: 'Completed',
-          },
-          {
-            id: '4',
-            invoiceNo: 'INV-2026-089',
-            customer: 'Amara Weerasinghe',
-            items: 'Thesis Hardcover Binding (x2)',
-            method: 'Bank Transfer',
-            total: 1300.0,
-            date: 'Today 11:15',
-            status: 'Pending',
-          },
-          {
-            id: '5',
-            invoiceNo: 'INV-2026-088',
-            customer: 'Faculty Bio Dept',
-            items: 'Damaged USB Cable Return',
-            method: 'Card',
-            total: 850.0,
-            date: 'Today 09:30',
-            status: 'Refunded',
-          },
-        ]);
-      }, 150);
-    });
+    const { sales } = await this._getLiveStoreData();
+
+    return sales.slice(0, 5).map((s) => ({
+      id: s.id,
+      invoiceNo: s.invoiceNo || s.id,
+      customer: s.customer || 'Walk-in Student',
+      items: Array.isArray(s.items)
+        ? s.items.map((i) => `${i.name} (x${i.quantity || 1})`).join(', ')
+        : 'Store Item',
+      method: s.method || 'CASH',
+      total: Number(s.total || 0),
+      date: s.date || 'Today',
+      status: s.status || 'Completed',
+    }));
   },
 
   /**
-   * 8. RECENT ACTIVITY
-   * GET /api/v1/dashboard/activity
+   * 8. RECENT ACTIVITY (Aggregated Telemetry from Real DB Records)
    */
   async getRecentActivity() {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve([
-          {
-            id: 'a1',
-            type: 'sale',
-            title: 'New sale completed',
-            description: 'Invoice #INV-2026-092 for LKR 1,240.00 (Cash)',
-            time: '5 mins ago',
-            color: 'text-[#43B02A]',
-            bg: 'bg-[#43B02A]/10',
-          },
-          {
-            id: 'a2',
-            type: 'product',
-            title: 'Product added',
-            description: 'Atlas Chooty Gel Pen (0.5mm) added to catalog',
-            time: '24 mins ago',
-            color: 'text-[#0B3B60]',
-            bg: 'bg-[#0B3B60]/10',
-          },
-          {
-            id: 'a3',
-            type: 'stock',
-            title: 'Stock received',
-            description: '50 units of A4 Copier Paper 80GSM restocked',
-            time: '1 hour ago',
-            color: 'text-indigo-600',
-            bg: 'bg-indigo-50',
-          },
-          {
-            id: 'a4',
-            type: 'customer',
-            title: 'Customer added',
-            description: 'Sandun Jayasuriya (ID: ST-2088) registered for discounts',
-            time: '2 hours ago',
-            color: 'text-sky-600',
-            bg: 'bg-sky-50',
-          },
-          {
-            id: 'a5',
-            type: 'refund',
-            title: 'Refund processed',
-            description: 'LKR 850.00 refunded for defective USB cable (#INV-2026-088)',
-            time: '4 hours ago',
-            color: 'text-rose-600',
-            bg: 'bg-rose-50',
-          },
-        ]);
-      }, 150);
+    const { sales, products, customers } = await this._getLiveStoreData();
+
+    const activityList = [];
+
+    // Add recent sales to activity
+    sales.slice(0, 3).forEach((s) => {
+      activityList.push({
+        id: `sale-${s.id}`,
+        type: 'sale',
+        title: 'New sale completed',
+        description: `Invoice #${s.invoiceNo || s.id} for LKR ${Number(s.total || 0).toFixed(2)} (${s.method || 'CASH'})`,
+        time: s.date || 'Recently',
+        color: 'text-[#43B02A]',
+        bg: 'bg-[#43B02A]/10',
+      });
     });
+
+    // Add recent products to activity
+    products.slice(0, 2).forEach((p) => {
+      activityList.push({
+        id: `prod-${p.id}`,
+        type: 'product',
+        title: 'Product in catalog',
+        description: `${p.name} (SKU: ${p.sku || 'N/A'}) in ${p.category}`,
+        time: 'Catalog Item',
+        color: 'text-[#0B3B60]',
+        bg: 'bg-[#0B3B60]/10',
+      });
+    });
+
+    // Add recent customer if exists
+    if (customers.length > 0) {
+      const c = customers[0];
+      activityList.push({
+        id: `cust-${c.id}`,
+        type: 'customer',
+        title: 'Customer in database',
+        description: `${c.name} registered for student discounts`,
+        time: 'Active Profile',
+        color: 'text-sky-600',
+        bg: 'bg-sky-50',
+      });
+    }
+
+    return activityList;
   },
 };
 

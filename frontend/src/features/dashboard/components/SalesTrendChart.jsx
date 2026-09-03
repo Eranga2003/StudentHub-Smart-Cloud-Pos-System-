@@ -21,13 +21,13 @@ export default function SalesTrendChart({ data = [], loading = false }) {
   }
 
   const chartData = data.length > 0 ? data : [
-    { day: 'Monday', short: 'Mon', sales: 34500 },
-    { day: 'Tuesday', short: 'Tue', sales: 42100 },
-    { day: 'Wednesday', short: 'Wed', sales: 38900 },
-    { day: 'Thursday', short: 'Thu', sales: 46700 },
-    { day: 'Friday', short: 'Fri', sales: 58200 },
-    { day: 'Saturday', short: 'Sat', sales: 52400 },
-    { day: 'Sunday', short: 'Sun', sales: 48250 },
+    { day: 'Monday', short: 'Mon', sales: 0 },
+    { day: 'Tuesday', short: 'Tue', sales: 0 },
+    { day: 'Wednesday', short: 'Wed', sales: 0 },
+    { day: 'Thursday', short: 'Thu', sales: 0 },
+    { day: 'Friday', short: 'Fri', sales: 0 },
+    { day: 'Saturday', short: 'Sat', sales: 0 },
+    { day: 'Sunday', short: 'Sun', sales: 0 },
   ];
 
   // SVG Chart Geometry calculations
@@ -36,7 +36,7 @@ export default function SalesTrendChart({ data = [], loading = false }) {
   const paddingX = 45;
   const paddingY = 30;
 
-  const maxSales = Math.max(...chartData.map((d) => d.sales)) * 1.15;
+  const maxSales = Math.max(...chartData.map((d) => d.sales), 1000) * 1.15;
   const minSales = 0;
 
   const points = chartData.map((item, index) => {

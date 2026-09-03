@@ -20,58 +20,7 @@ export default function RecentSalesTable({ sales = [], loading = false }) {
     );
   }
 
-  const salesList = sales.length > 0 ? sales : [
-    {
-      id: '1',
-      invoiceNo: 'INV-2026-092',
-      customer: 'Kasun Bandara (ST-1044)',
-      items: 'CR Book 120p (x2), Gel Pen Box',
-      method: 'Cash',
-      total: 1240.0,
-      date: 'Today 14:28',
-      status: 'Completed',
-    },
-    {
-      id: '2',
-      invoiceNo: 'INV-2026-091',
-      customer: 'Nimali Senanayake',
-      items: 'Scientific Calculator fx-991EX',
-      method: 'Card',
-      total: 6900.0,
-      date: 'Today 13:50',
-      status: 'Completed',
-    },
-    {
-      id: '3',
-      invoiceNo: 'INV-2026-090',
-      customer: 'Walk-in Student',
-      items: 'A4 Color Printing (35 pgs)',
-      method: 'Cash',
-      total: 875.0,
-      date: 'Today 12:45',
-      status: 'Completed',
-    },
-    {
-      id: '4',
-      invoiceNo: 'INV-2026-089',
-      customer: 'Amara Weerasinghe',
-      items: 'Thesis Hardcover Binding (x2)',
-      method: 'Bank Transfer',
-      total: 1300.0,
-      date: 'Today 11:15',
-      status: 'Pending',
-    },
-    {
-      id: '5',
-      invoiceNo: 'INV-2026-088',
-      customer: 'Faculty Bio Dept',
-      items: 'Damaged USB Cable Return',
-      method: 'Card',
-      total: 850.0,
-      date: 'Today 09:30',
-      status: 'Refunded',
-    },
-  ];
+  const salesList = sales;
 
   const getStatusBadge = (status) => {
     switch (status) {
@@ -123,51 +72,59 @@ export default function RecentSalesTable({ sales = [], loading = false }) {
         </button>
       </div>
 
-      {/* Table Content */}
-      <div className="overflow-x-auto">
-        <table className="w-full text-left text-sm">
-          <thead>
-            <tr className="bg-slate-50/80 text-xs font-semibold text-[#0B3B60] uppercase border-b border-slate-200">
-              <th className="px-5 py-3">Invoice No</th>
-              <th className="px-5 py-3">Customer</th>
-              <th className="px-5 py-3">Items</th>
-              <th className="px-5 py-3">Payment Method</th>
-              <th className="px-5 py-3 text-right">Total</th>
-              <th className="px-5 py-3 text-center">Date</th>
-              <th className="px-5 py-3 text-center">Status</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100">
-            {salesList.map((sale) => (
-              <tr key={sale.id || sale.invoiceNo} className="hover:bg-slate-50/80 transition-colors">
-                <td className="px-5 py-3.5 font-mono text-xs font-bold text-[#0B3B60]">
-                  {sale.invoiceNo}
-                </td>
-                <td className="px-5 py-3.5 font-medium text-slate-800 text-xs">
-                  {sale.customer}
-                </td>
-                <td className="px-5 py-3.5 text-xs text-slate-600 max-w-xs truncate">
-                  {sale.items}
-                </td>
-                <td className="px-5 py-3.5 text-xs">
-                  <span className="badge-navy px-2 py-0.5 rounded text-[11px]">
-                    {sale.method}
-                  </span>
-                </td>
-                <td className="px-5 py-3.5 text-right font-black text-sm text-[#0B3B60]">
-                  LKR {Number(sale.total || 0).toFixed(2)}
-                </td>
-                <td className="px-5 py-3.5 text-center text-xs font-mono text-slate-500 whitespace-nowrap">
-                  {sale.date}
-                </td>
-                <td className="px-5 py-3.5 text-center whitespace-nowrap">
-                  {getStatusBadge(sale.status)}
-                </td>
+      {/* Table Content or Empty State */}
+      {salesList.length === 0 ? (
+        <div className="p-8 text-center text-slate-400 space-y-2">
+          <ShoppingCart className="w-8 h-8 mx-auto opacity-30" />
+          <p className="text-xs font-semibold text-slate-700">No Transactions Recorded Yet</p>
+          <p className="text-[11px] text-slate-400">Sales completed in the POS terminal will be recorded here.</p>
+        </div>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm">
+            <thead>
+              <tr className="bg-slate-50/80 text-xs font-semibold text-[#0B3B60] uppercase border-b border-slate-200">
+                <th className="px-5 py-3">Invoice No</th>
+                <th className="px-5 py-3">Customer</th>
+                <th className="px-5 py-3">Items</th>
+                <th className="px-5 py-3">Payment Method</th>
+                <th className="px-5 py-3 text-right">Total</th>
+                <th className="px-5 py-3 text-center">Date</th>
+                <th className="px-5 py-3 text-center">Status</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {salesList.map((sale) => (
+                <tr key={sale.id || sale.invoiceNo} className="hover:bg-slate-50/80 transition-colors">
+                  <td className="px-5 py-3.5 font-mono text-xs font-bold text-[#0B3B60]">
+                    {sale.invoiceNo}
+                  </td>
+                  <td className="px-5 py-3.5 font-medium text-slate-800 text-xs">
+                    {sale.customer}
+                  </td>
+                  <td className="px-5 py-3.5 text-xs text-slate-600 max-w-xs truncate">
+                    {sale.items}
+                  </td>
+                  <td className="px-5 py-3.5 text-xs">
+                    <span className="badge-navy px-2 py-0.5 rounded text-[11px]">
+                      {sale.method}
+                    </span>
+                  </td>
+                  <td className="px-5 py-3.5 text-right font-black text-sm text-[#0B3B60]">
+                    LKR {Number(sale.total || 0).toFixed(2)}
+                  </td>
+                  <td className="px-5 py-3.5 text-center text-xs font-mono text-slate-500 whitespace-nowrap">
+                    {sale.date}
+                  </td>
+                  <td className="px-5 py-3.5 text-center whitespace-nowrap">
+                    {getStatusBadge(sale.status)}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       {/* Footer */}
       <div className="p-3 bg-slate-50/50 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">

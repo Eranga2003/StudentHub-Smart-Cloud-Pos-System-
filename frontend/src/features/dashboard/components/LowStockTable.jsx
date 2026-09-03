@@ -20,13 +20,7 @@ export default function LowStockTable({ items = [], loading = false }) {
     );
   }
 
-  const stockList = items.length > 0 ? items : [
-    { id: '1', name: 'Scientific Calculator fx-991EX', sku: 'EL-CAS-991', category: 'Stationery', currentStock: 2, minStock: 10, status: 'Critical' },
-    { id: '2', name: 'Elephant House Wonder Bar', sku: 'IC-WON-01', category: 'Ice Cream', currentStock: 1, minStock: 15, status: 'Critical' },
-    { id: '3', name: 'CR Book 200 Pages Ruled', sku: 'BK-CR-200', category: 'Books', currentStock: 4, minStock: 20, status: 'Low' },
-    { id: '4', name: 'SanDisk 64GB USB 3.0 Flash', sku: 'AC-USB-64G', category: 'USB Accessories', currentStock: 3, minStock: 12, status: 'Low' },
-    { id: '5', name: 'Graph Book 80 Pages A4', sku: 'BK-GRP-80', category: 'Books', currentStock: 5, minStock: 25, status: 'Low' },
-  ];
+  const stockList = items;
 
   return (
     <div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden flex flex-col justify-between">
@@ -52,9 +46,16 @@ export default function LowStockTable({ items = [], loading = false }) {
         </button>
       </div>
 
-      {/* Table Content */}
-      <div className="overflow-x-auto">
-        <table className="w-full text-left text-sm">
+      {/* Table Content or Empty State */}
+      {stockList.length === 0 ? (
+        <div className="p-8 text-center text-slate-400 space-y-2">
+          <Boxes className="w-8 h-8 text-[#43B02A] mx-auto opacity-80" />
+          <p className="text-xs font-semibold text-slate-700">All Stock Levels Optimal</p>
+          <p className="text-[11px] text-slate-400">There are currently zero low stock items in your Firestore database.</p>
+        </div>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm">
           <thead>
             <tr className="bg-slate-50/80 text-xs font-semibold text-[#0B3B60] uppercase border-b border-slate-200">
               <th className="px-5 py-3">Product</th>
@@ -120,6 +121,7 @@ export default function LowStockTable({ items = [], loading = false }) {
           </tbody>
         </table>
       </div>
+      )}
 
       {/* Footer */}
       <div className="p-3 bg-slate-50/50 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">

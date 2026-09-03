@@ -27,15 +27,15 @@ export default function SalesCategoryChart({ data = [], loading = false }) {
   }
 
   const categoryData = data.length > 0 ? data : [
-    { category: 'Books', sales: 124500, share: 32, color: '#0B3B60' },
-    { category: 'Stationery', sales: 98200, share: 25, color: '#43B02A' },
-    { category: 'Snacks & Chocolates', sales: 62400, share: 16, color: '#F59E0B' },
-    { category: 'Drinks', sales: 44300, share: 11, color: '#3B82F6' },
-    { category: 'Ice Cream', sales: 31800, share: 8, color: '#EC4899' },
-    { category: 'USB & Mobile Accessories', sales: 28800, share: 8, color: '#8B5CF6' },
+    { category: 'Books', sales: 0, share: 0, color: '#0B3B60' },
+    { category: 'Stationery', sales: 0, share: 0, color: '#43B02A' },
+    { category: 'Snacks & Chocolates', sales: 0, share: 0, color: '#F59E0B' },
+    { category: 'Drinks', sales: 0, share: 0, color: '#3B82F6' },
+    { category: 'Ice Cream', sales: 0, share: 0, color: '#EC4899' },
+    { category: 'USB & Mobile Accessories', sales: 0, share: 0, color: '#8B5CF6' },
   ];
 
-  const maxVal = Math.max(...categoryData.map((c) => c.sales)) * 1.15;
+  const maxVal = Math.max(...categoryData.map((c) => c.sales), 1000) * 1.15;
 
   return (
     <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-xs flex flex-col justify-between space-y-4">

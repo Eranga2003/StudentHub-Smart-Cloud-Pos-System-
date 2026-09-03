@@ -19,11 +19,7 @@ export default function PaymentMethodsChart({ data = [], loading = false }) {
     );
   }
 
-  const paymentData = data.length > 0 ? data : [
-    { method: 'Cash', percentage: 58, amount: 27985, color: '#43B02A', icon: Banknote },
-    { method: 'Card', percentage: 32, amount: 15440, color: '#0B3B60', icon: CreditCard },
-    { method: 'Bank Transfer', percentage: 10, amount: 4825, color: '#F59E0B', icon: Building },
-  ];
+  const paymentData = data;
 
   // SVG Donut geometry
   const size = 180;
@@ -64,6 +60,15 @@ export default function PaymentMethodsChart({ data = [], loading = false }) {
         {/* SVG Donut */}
         <div className="relative w-44 h-44 flex items-center justify-center shrink-0">
           <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="-rotate-90">
+            {/* Background Track Ring */}
+            <circle
+              cx={size / 2}
+              cy={size / 2}
+              r={radius}
+              fill="transparent"
+              stroke="#F1F5F9"
+              strokeWidth={strokeWidth}
+            />
             {slices.map((slice, i) => (
               <circle
                 key={i}
