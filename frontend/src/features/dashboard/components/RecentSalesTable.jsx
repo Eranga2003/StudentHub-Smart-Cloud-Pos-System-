@@ -81,7 +81,7 @@ export default function RecentSalesTable({ sales = [], loading = false }) {
         </div>
       ) : (
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
+          <table className="w-full text-left text-sm min-w-[620px]">
             <thead>
               <tr className="bg-slate-50/80 text-xs font-semibold text-[#0B3B60] uppercase border-b border-slate-200">
                 <th className="px-5 py-3">Invoice No</th>

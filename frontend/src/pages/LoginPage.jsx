@@ -94,8 +94,8 @@ export default function LoginPage() {
 
       {/* SUCCESS GREETING MODAL WITH ANIMATED BOT */}
       {loginSuccess && (
-        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-300">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-8 border border-white/20 shadow-2xl space-y-6 text-center relative overflow-hidden animate-in zoom-in-95 duration-300">
+        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 overflow-y-auto animate-in fade-in duration-300">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-5 sm:p-8 border border-white/20 shadow-2xl space-y-5 sm:space-y-6 text-center relative overflow-hidden animate-in zoom-in-95 duration-300 my-auto max-h-[94vh] overflow-y-auto">
             {/* Top decorative ribbon */}
             <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-[#0B3B60] via-[#43B02A] to-[#0B3B60]"></div>
 
@@ -151,7 +151,7 @@ export default function LoginPage() {
       {/* MAIN LOGIN CARD */}
       <div className="w-full max-w-md z-10 space-y-5">
         {/* Top Header Card */}
-        <div className="bg-white/95 backdrop-blur-xl rounded-3xl p-8 shadow-2xl border border-white/20 space-y-6">
+        <div className="bg-white/95 backdrop-blur-xl rounded-3xl p-6 sm:p-8 shadow-2xl border border-white/20 space-y-6">
           {/* Logo & Brand Identity */}
           <div className="text-center space-y-3">
             <div className="w-20 h-20 mx-auto rounded-2xl bg-white p-2 shadow-lg border border-slate-200/80 flex items-center justify-center relative group">

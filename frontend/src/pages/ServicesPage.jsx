@@ -242,7 +242,7 @@ export default function ServicesPage() {
             </button>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
             <div className="p-3 bg-slate-50 rounded-lg border border-slate-200 space-y-1">
               <label className="font-bold text-slate-700 block">A4 B&W Print (1 Page)</label>
               <div className="relative">
@@ -359,7 +359,7 @@ export default function ServicesPage() {
       )}
 
       {/* Service Selection Tabs Bar */}
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 sm:gap-3">
         {servicesList.map((srv) => {
           const Icon = srv.icon;
           const isSelected = activeService === srv.id;
@@ -388,9 +388,9 @@ export default function ServicesPage() {
       </div>
 
       {/* Calculator Body */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-6">
         {/* Left Options (8 cols) */}
-        <div className="lg:col-span-8 bg-white rounded-xl p-6 border border-slate-200 shadow-xs space-y-6">
+        <div className="lg:col-span-8 bg-white rounded-xl p-4 sm:p-6 border border-slate-200 shadow-xs space-y-5 sm:space-y-6">
           {/* PROMINENT USER INPUT RATE CARD FOR THE ACTIVE JOB */}
           <div className="p-4 rounded-xl bg-[#0B3B60]/5 border border-[#0B3B60]/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
             <div>
@@ -628,7 +628,7 @@ export default function ServicesPage() {
         </div>
 
         {/* Right Live Breakdown (4 cols) */}
-        <div className="lg:col-span-4 bg-white rounded-xl p-6 border border-slate-200 shadow-xs flex flex-col justify-between space-y-6">
+        <div className="lg:col-span-4 bg-white rounded-xl p-4 sm:p-6 border border-slate-200 shadow-xs flex flex-col justify-between space-y-5 sm:space-y-6">
           <div className="space-y-4">
             <h2 className="text-base font-bold text-[#0B3B60] pb-2 border-b border-slate-100">
               Live Quotation

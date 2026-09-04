@@ -7,7 +7,7 @@ export default function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-[#F0F4F8] text-slate-800 flex">
+    <div className="min-h-screen bg-[#F0F4F8] text-slate-800 flex overflow-x-hidden">
       {/* Brand Navy Floating Sidebar */}
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
@@ -16,7 +16,7 @@ export default function Layout() {
         <div className="flex-1 flex flex-col min-w-0 lg:pr-3.5 lg:py-3.5">
           <Navbar onMenuToggle={() => setSidebarOpen(true)} />
 
-          <main className="flex-1 px-4 pb-6 sm:px-6 sm:pb-8 lg:px-1 max-w-7xl w-full mx-auto">
+          <main className="flex-1 px-3 pb-6 sm:px-6 sm:pb-8 lg:px-1 max-w-7xl w-full mx-auto">
             <Outlet />
           </main>
         </div>

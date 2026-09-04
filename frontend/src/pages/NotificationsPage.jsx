@@ -69,7 +69,7 @@ export default function NotificationsPage() {
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3 self-start sm:self-auto">
           <button onClick={loadAlerts} className="btn-glass text-xs py-2 px-3">
             <Cloud className="w-3.5 h-3.5 text-[#43B02A]" />
             <span>Sync</span>

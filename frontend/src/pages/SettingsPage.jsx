@@ -127,7 +127,7 @@ export default function SettingsPage() {
       ) : (
         <form onSubmit={handleSave} className="space-y-6">
           {/* Store Profile / Receipt Billing Details */}
-          <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-xs space-y-4">
+          <div className="bg-white rounded-xl p-4 sm:p-6 border border-slate-200 shadow-xs space-y-4">
             <div className="pb-3 border-b border-slate-100 flex items-center justify-between">
               <div>
                 <h2 className="text-base font-bold text-[#0B3B60] flex items-center gap-2">
@@ -230,7 +230,7 @@ export default function SettingsPage() {
           </div>
 
           {/* Printer & Hardware */}
-          <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-xs space-y-4">
+          <div className="bg-white rounded-xl p-4 sm:p-6 border border-slate-200 shadow-xs space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
               <h2 className="text-base font-bold text-[#0B3B60] flex items-center gap-2">
                 <Printer className="w-4 h-4 text-[#0B3B60]" />

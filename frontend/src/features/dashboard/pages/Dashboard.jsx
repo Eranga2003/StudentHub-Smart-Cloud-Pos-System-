@@ -103,7 +103,7 @@ export default function Dashboard() {
       <QuickActions />
 
       {/* 3. Top Summary Cards (6 KPIs) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-2.5 sm:gap-3">
         {/* Card 1: Today's Sales */}
         <StatCard
           title={summary?.todaySales?.title || "Today's Sales"}

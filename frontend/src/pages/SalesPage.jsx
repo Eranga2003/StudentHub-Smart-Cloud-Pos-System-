@@ -149,7 +149,7 @@ export default function SalesPage() {
       ) : (
         <div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
+            <table className="w-full text-left text-sm min-w-[660px]">
               <thead>
                 <tr className="bg-slate-50/80 text-xs font-semibold text-[#0B3B60] uppercase border-b border-slate-200">
                   <th className="px-5 py-3.5">Invoice #</th>
@@ -215,8 +215,8 @@ export default function SalesPage() {
 
       {/* Invoice Detail / Receipt Modal */}
       {selectedInvoice && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-sm w-full p-6 border border-slate-200 shadow-2xl space-y-4">
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+          <div className="bg-white rounded-2xl max-w-sm w-full p-4 sm:p-6 border border-slate-200 shadow-2xl space-y-4 my-auto max-h-[92vh] overflow-y-auto">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
               <span className="text-xs font-mono font-bold text-[#0B3B60]">
                 {selectedInvoice.invoiceNo || selectedInvoice.id}

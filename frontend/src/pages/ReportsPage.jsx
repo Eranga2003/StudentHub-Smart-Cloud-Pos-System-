@@ -781,7 +781,7 @@ export default function ReportsPage() {
       {activeReport === 'sales' && (
         <div className="space-y-5">
           {/* KPI Summary Banner */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
             <div className="bg-white rounded-xl p-4 border border-slate-200 shadow-xs">
               <span className="text-[11px] text-slate-400 font-semibold uppercase tracking-wider">Filtered Revenue</span>
               <p className="text-xl font-black text-[#0B3B60] mt-1">
@@ -1015,7 +1015,7 @@ export default function ReportsPage() {
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs">
+                <table className="w-full text-left text-xs min-w-[760px]">
                   <thead>
                     <tr className="bg-[#0B3B60] text-white uppercase text-[11px] tracking-wider">
                       <th className="px-4 py-3.5">Date</th>
@@ -1156,7 +1156,7 @@ export default function ReportsPage() {
       {activeReport === 'products' && (
         <div className="space-y-5">
           {/* KPI Summary Banner */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
             <div className="bg-white rounded-xl p-4 border border-slate-200 shadow-xs">
               <span className="text-[11px] text-slate-400 font-semibold uppercase tracking-wider">Filtered Products</span>
               <p className="text-xl font-black text-[#0B3B60] mt-1">{filteredProducts.length} Items</p>
@@ -1321,7 +1321,7 @@ export default function ReportsPage() {
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs">
+                <table className="w-full text-left text-xs min-w-[780px]">
                   <thead>
                     <tr className="bg-[#0B3B60] text-white uppercase text-[11px] tracking-wider">
                       <th className="px-4 py-3.5">Product Name</th>
@@ -1445,7 +1445,7 @@ export default function ReportsPage() {
 
       {/* Floating Download Success Notification Toast */}
       {downloadNotification && (
-        <div className="fixed bottom-6 right-6 z-50 bg-[#0B3B60] text-white p-4 rounded-xl shadow-2xl border border-white/20 flex items-center gap-3 animate-in slide-in-from-bottom-4 duration-200">
+        <div className="fixed bottom-4 left-3 right-3 sm:left-auto sm:right-6 sm:bottom-6 z-50 bg-[#0B3B60] text-white p-3.5 sm:p-4 rounded-xl shadow-2xl border border-white/20 flex items-center gap-3 animate-in slide-in-from-bottom-4 duration-200 sm:max-w-md">
           <div className="w-9 h-9 rounded-lg bg-[#43B02A] flex items-center justify-center shrink-0 shadow-sm">
             <Download className="w-5 h-5 text-white" />
           </div>

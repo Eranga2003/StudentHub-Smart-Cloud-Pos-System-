@@ -17,6 +17,9 @@ import {
   Cloud,
   Loader2,
   AlertTriangle,
+  ArrowLeft,
+  ChevronRight,
+  Package,
 } from 'lucide-react';
 import { firestoreService, generateItemSkus } from '../services/firestoreService.js';
 
@@ -47,6 +50,7 @@ export default function POSPage() {
   const [storeSettings, setStoreSettings] = useState(null);
   const [completedReceipt, setCompletedReceipt] = useState(null);
   const [warningMessage, setWarningMessage] = useState(null);
+  const [mobileTab, setMobileTab] = useState('catalog'); // 'catalog' | 'cart'
 
   const showWarning = (msg) => {
     setWarningMessage(msg);
@@ -304,10 +308,43 @@ export default function POSPage() {
         </div>
       )}
 
+      {/* MOBILE TAB SWITCHER (Visible strictly on mobile & tablet < lg) */}
+      <div className="lg:hidden flex items-center p-1 bg-slate-200/90 rounded-xl mb-3 shadow-xs">
+        <button
+          type="button"
+          onClick={() => setMobileTab('catalog')}
+          className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+            mobileTab === 'catalog'
+              ? 'bg-[#0B3B60] text-white shadow-xs'
+              : 'text-slate-600 hover:text-slate-900'
+          }`}
+        >
+          <Package className="w-3.5 h-3.5" />
+          <span>Products ({filteredCatalog.length})</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setMobileTab('cart')}
+          className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer relative ${
+            mobileTab === 'cart'
+              ? 'bg-[#43B02A] text-white shadow-xs'
+              : 'text-slate-600 hover:text-slate-900'
+          }`}
+        >
+          <ShoppingCart className="w-3.5 h-3.5" />
+          <span>Bill ({cart.reduce((sum, item) => sum + item.quantity, 0)})</span>
+          {cart.length > 0 && (
+            <span className="ml-1 text-[10px] bg-black/20 text-white font-mono px-1.5 py-0.5 rounded-full">
+              LKR {grandTotal.toFixed(0)}
+            </span>
+          )}
+        </button>
+      </div>
+
       {/* POS Screen Split: Catalog (8 cols) + Cart (4 cols) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-6 items-start pb-16 lg:pb-0">
         {/* CATALOG PANEL */}
-        <div className="lg:col-span-8 space-y-4">
+        <div className={`space-y-4 lg:col-span-8 ${mobileTab === 'catalog' ? 'block' : 'hidden lg:block'}`}>
           {/* Header & Search */}
           <div className="bg-white rounded-xl p-4 border border-slate-200 shadow-xs space-y-3">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
@@ -468,10 +505,17 @@ export default function POSPage() {
         </div>
 
         {/* CART & CHECKOUT PANEL */}
-        <div className="lg:col-span-4 bg-white rounded-xl border border-slate-200 shadow-xs flex flex-col min-h-[580px]">
+        <div className={`lg:col-span-4 bg-white rounded-xl border border-slate-200 shadow-xs flex flex-col min-h-[520px] ${mobileTab === 'cart' ? 'block' : 'hidden lg:block'}`}>
           {/* Cart Header */}
           <div className="p-4 border-b border-slate-100 flex items-center justify-between">
             <div className="flex items-center gap-2">
+              <button
+                onClick={() => setMobileTab('catalog')}
+                className="lg:hidden p-1 rounded-md text-slate-500 hover:bg-slate-100 mr-0.5 cursor-pointer"
+                title="Back to Catalog"
+              >
+                <ArrowLeft className="w-4 h-4 text-[#0B3B60]" />
+              </button>
               <ShoppingCart className="w-5 h-5 text-[#0B3B60]" />
               <h2 className="font-bold text-base text-[#0B3B60]">Current Order</h2>
             </div>
@@ -745,10 +789,34 @@ export default function POSPage() {
         </div>
       </div>
 
+      {/* Mobile Floating Cart Summary Pill */}
+      {cart.length > 0 && mobileTab === 'catalog' && (
+        <div className="lg:hidden fixed bottom-3 left-3 right-3 z-40 animate-in slide-in-from-bottom-3 duration-200">
+          <button
+            onClick={() => setMobileTab('cart')}
+            className="w-full bg-[#0B3B60] text-white p-3 rounded-2xl shadow-2xl border border-white/20 flex items-center justify-between cursor-pointer hover:bg-[#082d49] transition-all"
+          >
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-xl bg-[#43B02A] text-white flex items-center justify-center font-bold text-xs shadow-xs">
+                {cart.reduce((sum, item) => sum + item.quantity, 0)}
+              </div>
+              <div className="text-left">
+                <p className="text-[10px] uppercase font-bold text-slate-300 leading-none">In Current Bill</p>
+                <p className="text-sm font-black text-white mt-0.5">LKR {grandTotal.toFixed(2)}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-1 text-xs font-bold text-[#43B02A] bg-white/10 px-3 py-1.5 rounded-xl border border-white/10">
+              <span>View Bill & Pay</span>
+              <ChevronRight className="w-4 h-4" />
+            </div>
+          </button>
+        </div>
+      )}
+
       {/* CHECKOUT MODAL */}
       {isCheckoutOpen && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 border border-slate-200 shadow-2xl space-y-5 animate-in fade-in zoom-in-95">
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+          <div className="bg-white rounded-2xl max-w-md w-full p-5 sm:p-6 border border-slate-200 shadow-2xl space-y-4 sm:space-y-5 animate-in fade-in zoom-in-95 my-auto max-h-[92vh] overflow-y-auto">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
               <div>
                 <h3 className="text-lg font-bold text-[#0B3B60]">Payment & Receipt</h3>
@@ -838,10 +906,10 @@ export default function POSPage() {
 
       {/* COMPLETED BILL / RECEIPT POPUP (PRINT SIZED FOR EPSON L130 & DESKTOP POS) */}
       {completedReceipt && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
           <div
             id="printable-bill"
-            className="bg-white rounded-2xl max-w-sm w-full p-5 border border-slate-200 shadow-2xl space-y-3 font-mono text-xs animate-in fade-in zoom-in-95 my-auto"
+            className="bg-white rounded-2xl max-w-sm w-full p-4 sm:p-5 border border-slate-200 shadow-2xl space-y-3 font-mono text-xs animate-in fade-in zoom-in-95 my-auto max-h-[95vh] overflow-y-auto"
           >
             {/* Top Shop Logo & Header */}
             <div className="flex flex-col items-center justify-center pb-2 text-center border-b border-dashed border-slate-300">
