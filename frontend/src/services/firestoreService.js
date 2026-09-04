@@ -14,6 +14,61 @@ import {
 import { db } from '../config/firebase.js';
 
 /**
+ * Generates an array of individual item SKUs for bulk inventory.
+ * Example: baseSku="SKU-1107", count=4 -> ["SKU-1107", "SKU-1108", "SKU-1109", "SKU-1110"]
+ * Preserves any existing SKUs in existingSkus and continues numbering without duplicate collision.
+ */
+export function generateItemSkus(baseSku, count, existingSkus = []) {
+  const current = Array.isArray(existingSkus) ? [...existingSkus] : [];
+  const targetCount = Math.max(0, Number(count) || 0);
+
+  if (targetCount === 0) {
+    return [];
+  }
+
+  if (current.length >= targetCount) {
+    return current.slice(0, targetCount);
+  }
+
+  // Parse baseSku to extract prefix, separator, and start number
+  // e.g. "SKU-1107" -> prefix "SKU-", number 1107, length 4
+  const match = String(baseSku || 'SKU-1001').match(/^(.*?)(-|\s|_)?(\d+)$/);
+  let prefix = 'SKU-';
+  let startNum = 1001;
+  let padLen = 0;
+
+  if (match) {
+    prefix = (match[1] || 'SKU') + (match[2] || '-');
+    startNum = parseInt(match[3], 10);
+    padLen = match[3].length;
+  } else {
+    prefix = `${baseSku ? baseSku.trim() : 'SKU'}-`;
+    startNum = 1001;
+  }
+
+  // Find max existing number in current list to prevent duplicate collisions
+  let maxNum = startNum - 1;
+  current.forEach((itemSku) => {
+    const numMatch = String(itemSku).match(/(\d+)$/);
+    if (numMatch) {
+      const n = parseInt(numMatch[1], 10);
+      if (n > maxNum) maxNum = n;
+    }
+  });
+
+  let nextNum = maxNum >= startNum ? maxNum + 1 : startNum;
+  const needed = targetCount - current.length;
+
+  for (let i = 0; i < needed; i++) {
+    const numStr = padLen > 0 ? String(nextNum).padStart(padLen, '0') : String(nextNum);
+    current.push(`${prefix}${numStr}`);
+    nextNum++;
+  }
+
+  return current;
+}
+
+/**
  * Pure Firestore Service for User Input Data
  * All data is read from and written directly to Cloud Firestore.
  * Zero mock or demo data.
@@ -23,7 +78,20 @@ export const firestoreService = {
   async getProducts() {
     try {
       const snapshot = await getDocs(collection(db, 'products'));
-      return snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+      return snapshot.docs.map((d) => {
+        const data = d.data();
+        const stock = Number(data.stock) || 0;
+        const baseSku = data.sku || 'SKU-1001';
+        const itemIds = Array.isArray(data.itemIds) && data.itemIds.length === stock
+          ? data.itemIds
+          : generateItemSkus(baseSku, stock, data.itemIds || []);
+        return {
+          id: d.id,
+          ...data,
+          stock,
+          itemIds,
+        };
+      });
     } catch (error) {
       console.error('[Firestore] getProducts error:', error.message);
       throw error;
@@ -32,18 +100,22 @@ export const firestoreService = {
 
   async addProduct(product) {
     try {
+      const stockNum = Math.max(0, Number(product.stock) || 0);
+      const baseSku = product.sku?.trim() || `SKU-${Date.now().toString().slice(-4)}`;
+      const itemIds = generateItemSkus(baseSku, stockNum);
       const docRef = await addDoc(collection(db, 'products'), {
         name: product.name,
-        sku: product.sku || '',
+        sku: baseSku,
         category: product.category || 'General',
         costPrice: Number(product.costPrice) || 0,
         sellingPrice: Number(product.sellingPrice) || 0,
-        stock: Number(product.stock) || 0,
+        stock: stockNum,
+        itemIds: itemIds,
         reorderLevel: Number(product.reorderLevel) || 5,
-        status: Number(product.stock) > 5 ? 'In Stock' : Number(product.stock) > 0 ? 'Low Stock' : 'Out of Stock',
+        status: stockNum > 5 ? 'In Stock' : stockNum > 0 ? 'Low Stock' : 'Out of Stock',
         createdAt: serverTimestamp(),
       });
-      return { id: docRef.id, ...product };
+      return { id: docRef.id, ...product, sku: baseSku, stock: stockNum, itemIds };
     } catch (error) {
       console.error('[Firestore] addProduct error:', error.message);
       throw error;
@@ -77,14 +149,21 @@ export const firestoreService = {
   async adjustStock(productId, newStock, reason = 'Manual Adjustment') {
     try {
       const productRef = doc(db, 'products', productId);
+      const snap = await getDoc(productRef);
       const stockNum = Math.max(0, Number(newStock) || 0);
+      let newItemIds = [];
+      if (snap.exists()) {
+        const data = snap.data();
+        newItemIds = generateItemSkus(data.sku || 'SKU-1001', stockNum, data.itemIds || []);
+      }
       await updateDoc(productRef, {
         stock: stockNum,
+        itemIds: newItemIds,
         status: stockNum > 5 ? 'In Stock' : stockNum > 0 ? 'Low Stock' : 'Out of Stock',
         lastAdjustReason: reason,
         updatedAt: serverTimestamp(),
       });
-      return { id: productId, stock: stockNum };
+      return { id: productId, stock: stockNum, itemIds: newItemIds };
     } catch (error) {
       console.error('[Firestore] adjustStock error:', error.message);
       throw error;
@@ -104,33 +183,73 @@ export const firestoreService = {
 
   async addSale(saleData) {
     try {
-      const docRef = await addDoc(collection(db, 'sales'), {
+      // Process and randomly select/remove stock items for purchased products
+      const processedItems = [];
+      if (Array.isArray(saleData.items)) {
+        for (const item of saleData.items) {
+          const itemCopy = { ...item };
+          if (itemCopy.id && !itemCopy.id.startsWith('srv-')) {
+            try {
+              const productRef = doc(db, 'products', itemCopy.id);
+              const snap = await getDoc(productRef);
+              if (snap.exists()) {
+                const prodData = snap.data();
+                const currentStock = Number(prodData.stock) || itemCopy.currentStock || 0;
+                let availableSkus = Array.isArray(prodData.itemIds) && prodData.itemIds.length > 0
+                  ? [...prodData.itemIds]
+                  : generateItemSkus(prodData.sku || itemCopy.barcode || 'SKU-1001', currentStock);
+
+                // Use pre-selected soldSkus if provided, or pick randomly now
+                let soldSkus = Array.isArray(itemCopy.soldSkus) && itemCopy.soldSkus.length > 0
+                  ? [...itemCopy.soldSkus]
+                  : [];
+
+                if (soldSkus.length === 0) {
+                  const qtyToDeduct = Math.min(Number(itemCopy.quantity) || 1, availableSkus.length);
+                  for (let q = 0; q < qtyToDeduct; q++) {
+                    const randomIndex = Math.floor(Math.random() * availableSkus.length);
+                    const [pickedSku] = availableSkus.splice(randomIndex, 1);
+                    soldSkus.push(pickedSku);
+                  }
+                } else {
+                  // Deduct the pre-selected soldSkus from availableSkus
+                  soldSkus.forEach((sku) => {
+                    const idx = availableSkus.indexOf(sku);
+                    if (idx !== -1) availableSkus.splice(idx, 1);
+                  });
+                }
+
+                itemCopy.soldSkus = soldSkus;
+                const newStock = availableSkus.length;
+
+                await updateDoc(productRef, {
+                  stock: newStock,
+                  itemIds: availableSkus,
+                  status: newStock > 5 ? 'In Stock' : newStock > 0 ? 'Low Stock' : 'Out of Stock',
+                  updatedAt: serverTimestamp(),
+                });
+              }
+            } catch (err) {
+              console.warn('[Firestore] Stock deduction note for product ' + itemCopy.id + ':', err.message);
+            }
+          }
+          processedItems.push(itemCopy);
+        }
+      }
+
+      // Sanitize data to avoid any undefined field errors in Firestore
+      const sanitizedData = JSON.parse(JSON.stringify({
         ...saleData,
+        items: processedItems,
+      }));
+
+      const docRef = await addDoc(collection(db, 'sales'), {
+        ...sanitizedData,
         createdAt: serverTimestamp(),
         date: new Date().toISOString().replace('T', ' ').slice(0, 16),
       });
 
-      // Update stock for purchased products in Firestore
-      if (Array.isArray(saleData.items)) {
-        for (const item of saleData.items) {
-          if (item.id && !item.id.startsWith('srv-')) {
-            try {
-              const productRef = doc(db, 'products', item.id);
-              if (item.currentStock !== undefined) {
-                const newStock = Math.max(0, item.currentStock - item.quantity);
-                await updateDoc(productRef, {
-                  stock: newStock,
-                  status: newStock > 5 ? 'In Stock' : newStock > 0 ? 'Low Stock' : 'Out of Stock',
-                });
-              }
-            } catch (err) {
-              console.warn('[Firestore] Stock update note:', err.message);
-            }
-          }
-        }
-      }
-
-      return { id: docRef.id, ...saleData };
+      return { id: docRef.id, ...sanitizedData };
     } catch (error) {
       console.error('[Firestore] addSale error:', error.message);
       throw error;

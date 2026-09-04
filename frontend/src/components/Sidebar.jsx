@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
   ShoppingCart,
@@ -29,7 +29,9 @@ import {
   ArrowDownCircle,
   AlertTriangle,
   Sliders,
+  LogOut,
 } from 'lucide-react';
+import { authService } from '../services/authService.js';
 
 const navStructure = [
   {
@@ -108,9 +110,6 @@ const navStructure = [
     subPages: [
       { title: 'Sales Report', path: '/reports/sales' },
       { title: 'Product Report', path: '/reports/products' },
-      { title: 'Service Report', path: '/reports/services' },
-      { title: 'Inventory Report', path: '/reports/inventory' },
-      { title: 'Profit & Loss', path: '/reports/profit-loss' },
     ],
   },
   {
@@ -132,6 +131,7 @@ const navStructure = [
 
 export default function Sidebar({ isOpen, onClose }) {
   const location = useLocation();
+  const navigate = useNavigate();
 
   // Manage open states for accordion items
   const [openSections, setOpenSections] = useState({});
@@ -171,13 +171,16 @@ export default function Sidebar({ isOpen, onClose }) {
       )}
 
       {/* Main Sidebar: Official Brand Navy Blue (#0B3B60) */}
+      {/* Main Sidebar: Official Brand Navy Blue (#0B3B60) - Modern Floating Panel */}
       <aside
-        className={`fixed top-0 bottom-0 left-0 z-50 w-72 bg-[#0B3B60] text-white flex flex-col transition-transform duration-300 ease-in-out lg:translate-x-0 ${
-          isOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'
-        }`}
+        className={`fixed z-50 w-72 bg-[#0B3B60] text-white flex flex-col transition-all duration-300 ease-in-out
+          inset-y-0 left-0
+          lg:inset-y-3.5 lg:left-3.5 lg:h-[calc(100vh-1.75rem)] lg:rounded-2xl lg:shadow-2xl lg:shadow-[#051C30]/25 lg:border lg:border-white/10 overflow-hidden
+          ${isOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full lg:translate-x-0'}
+        `}
       >
         {/* Brand Header with Real Official Logo */}
-        <div className="p-4 border-b border-white/10 bg-[#082d49]/80 flex items-center justify-between">
+        <div className="p-4 border-b border-white/10 bg-[#082d49]/80 lg:rounded-t-2xl flex items-center justify-between">
           <div className="flex items-center gap-3">
             {/* Real Logo Image Container */}
             <div className="w-12 h-12 rounded-xl bg-white p-1 flex items-center justify-center shadow-md border border-white/20 overflow-hidden shrink-0">
@@ -336,16 +339,32 @@ export default function Sidebar({ isOpen, onClose }) {
           })}
         </nav>
 
-        {/* Cashier Footer */}
-        <div className="p-3 border-t border-white/10 bg-[#062033]/80">
-          <div className="flex items-center gap-3 p-2 rounded-lg bg-white/5">
-            <div className="w-8 h-8 rounded-full bg-[#43B02A] text-white font-bold flex items-center justify-center text-xs shadow-inner shrink-0">
-              EC
+        {/* Cashier Footer with Dinesh Profile & Logout Button */}
+        <div className="p-3 border-t border-white/10 bg-[#062033]/80 lg:rounded-b-2xl">
+          <div className="flex items-center justify-between p-2 rounded-xl bg-white/5 border border-white/5">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-8 h-8 rounded-full bg-[#43B02A] text-white font-black flex items-center justify-center text-xs shadow-inner shrink-0">
+                D
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs font-bold text-white truncate">Dinesh</p>
+                <p className="text-[10px] text-[#43B02A] font-semibold truncate flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#43B02A] animate-pulse"></span>
+                  Store Admin • 19h
+                </p>
+              </div>
             </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-xs font-semibold text-white truncate">Eranga C.</p>
-              <p className="text-[11px] text-white/60 truncate">Senior Cashier • Shift 01</p>
-            </div>
+
+            <button
+              onClick={() => {
+                authService.logout();
+                navigate('/login');
+              }}
+              className="p-1.5 rounded-lg text-white/50 hover:text-rose-400 hover:bg-rose-500/10 transition-colors shrink-0 cursor-pointer"
+              title="Sign Out of POS (19h Session)"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
           </div>
         </div>
       </aside>

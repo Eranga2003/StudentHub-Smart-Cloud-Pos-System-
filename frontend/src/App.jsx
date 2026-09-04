@@ -17,12 +17,25 @@ import ReportsPage from './pages/ReportsPage.jsx';
 import EmployeesPage from './pages/EmployeesPage.jsx';
 import NotificationsPage from './pages/NotificationsPage.jsx';
 import SettingsPage from './pages/SettingsPage.jsx';
+import LoginPage from './pages/LoginPage.jsx';
+import ProtectedRoute from './components/ProtectedRoute.jsx';
 
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Layout />}>
+        {/* Public Login Route */}
+        <Route path="/login" element={<LoginPage />} />
+
+        {/* Protected Dashboard & POS Application Routes */}
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <Layout />
+            </ProtectedRoute>
+          }
+        >
           <Route index element={<DashboardPage />} />
 
           {/* POS Terminal & Sub-pages */}

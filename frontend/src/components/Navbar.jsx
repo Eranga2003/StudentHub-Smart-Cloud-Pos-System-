@@ -22,7 +22,7 @@ export default function Navbar({ onMenuToggle }) {
   }, []);
 
   return (
-    <header className="sticky top-0 z-30 h-16 bg-white border-b border-slate-200/80 px-4 lg:px-6 flex items-center justify-between shadow-xs">
+    <header className="sticky top-0 lg:top-3.5 z-30 h-16 bg-white/95 backdrop-blur-md border-b border-slate-200/80 lg:border lg:border-slate-200/90 lg:rounded-2xl px-4 lg:px-6 flex items-center justify-between shadow-xs mb-4 lg:mb-5 transition-all">
       {/* Left: Mobile Toggle & Page Search */}
       <div className="flex items-center gap-3 lg:gap-4 flex-1 max-w-xl">
         <button

@@ -13,8 +13,11 @@ import {
   CheckCircle2,
   Loader2,
   Sparkles,
+  Copy,
+  Check,
+  Layers,
 } from 'lucide-react';
-import { firestoreService } from '../services/firestoreService.js';
+import { firestoreService, generateItemSkus } from '../services/firestoreService.js';
 
 const categoryMap = {
   books: 'Books',
@@ -62,6 +65,15 @@ export default function ProductsPage() {
   const [viewProduct, setViewProduct] = useState(null);
   const [actionSuccess, setActionSuccess] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [copiedSkus, setCopiedSkus] = useState(false);
+
+  const handleCopySkus = (skus) => {
+    if (!skus || skus.length === 0) return;
+    const text = skus.map((s) => `SKU: ${s}`).join('\n');
+    navigator.clipboard.writeText(text);
+    setCopiedSkus(true);
+    setTimeout(() => setCopiedSkus(false), 2000);
+  };
 
   // User input form state
   const [newProduct, setNewProduct] = useState({
@@ -292,7 +304,17 @@ export default function ProductsPage() {
                       {p.name}
                     </td>
                     <td className="px-5 py-3.5 font-mono text-xs text-slate-500">
-                      {p.sku || 'N/A'}
+                      <div className="flex items-center gap-1.5">
+                        <span>{p.sku || 'N/A'}</span>
+                        {p.stock > 1 && (
+                          <span
+                            className="text-[10px] font-sans font-semibold text-[#0B3B60] bg-[#0B3B60]/10 px-1.5 py-0.5 rounded"
+                            title={`${p.stock} individual unit SKUs`}
+                          >
+                            {p.stock} units
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td className="px-5 py-3.5 text-slate-600 text-xs">
                       <span className="badge-navy px-2 py-0.5 rounded text-[11px]">
@@ -510,57 +532,142 @@ export default function ProductsPage() {
       )}
 
       {/* VIEW PRODUCT MODAL */}
-      {viewProduct && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 border border-slate-200 shadow-2xl space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-              <h3 className="text-lg font-bold text-[#0B3B60]">Product Details</h3>
-              <button
-                onClick={() => setViewProduct(null)}
-                className="p-1 rounded-md text-slate-400 hover:text-slate-600"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
+      {viewProduct && (() => {
+        const itemSkus = Array.isArray(viewProduct.itemIds) && viewProduct.itemIds.length === Number(viewProduct.stock)
+          ? viewProduct.itemIds
+          : generateItemSkus(viewProduct.sku, Number(viewProduct.stock) || 0, viewProduct.itemIds || []);
 
-            <div className="space-y-3 text-sm">
-              <div className="bg-slate-50 p-4 rounded-xl space-y-2">
-                <p className="text-base font-bold text-slate-800">{viewProduct.name}</p>
-                <p className="text-xs text-slate-500 font-mono">SKU: {viewProduct.sku || 'N/A'}</p>
-                <span className="badge-navy px-2.5 py-0.5 rounded-full text-xs font-semibold inline-block">
-                  {viewProduct.category}
+        return (
+          <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+            <div className="bg-white rounded-2xl max-w-lg w-full p-6 border border-slate-200 shadow-2xl space-y-4 animate-in fade-in zoom-in-95">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-xl bg-[#0B3B60]/10 text-[#0B3B60] flex items-center justify-center">
+                    <Package className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold text-[#0B3B60]">Product Inventory Details</h3>
+                    <p className="text-xs text-slate-400">Single & Bulk stock tracking</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setViewProduct(null)}
+                  className="p-1 rounded-md text-slate-400 hover:text-slate-600 transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Product Info Banner */}
+              <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-2">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <h4 className="text-base font-bold text-slate-800">{viewProduct.name}</h4>
+                    <p className="text-xs text-slate-500 font-mono mt-0.5">Base Code: {viewProduct.sku || 'N/A'}</p>
+                  </div>
+                  <span className="badge-navy px-2.5 py-0.5 rounded-full text-xs font-semibold shrink-0">
+                    {viewProduct.category}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-200/60">
+                  <div className="p-2 rounded-lg bg-white border border-slate-200/80">
+                    <span className="text-[10px] uppercase font-bold text-slate-400 block">Selling Price</span>
+                    <span className="text-sm font-bold text-[#0B3B60]">
+                      LKR {Number(viewProduct.sellingPrice || 0).toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="p-2 rounded-lg bg-white border border-slate-200/80">
+                    <span className="text-[10px] uppercase font-bold text-slate-400 block">Cost Price</span>
+                    <span className="text-sm font-bold text-slate-600">
+                      LKR {Number(viewProduct.costPrice || 0).toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="p-2 rounded-lg bg-white border border-slate-200/80">
+                    <span className="text-[10px] uppercase font-bold text-slate-400 block">Current Stock</span>
+                    <span className="text-sm font-bold text-slate-800 flex items-center gap-1.5">
+                      <span className={`w-2 h-2 rounded-full ${viewProduct.stock > 0 ? 'bg-[#43B02A]' : 'bg-red-500'}`}></span>
+                      {viewProduct.stock} {viewProduct.stock === 1 ? 'unit' : 'units'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* BULK / INDIVIDUAL ITEM ID LIST */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Layers className="w-4 h-4 text-[#0B3B60]" />
+                    <span className="text-xs font-bold text-slate-800">
+                      Individual Stock Unit IDs ({itemSkus.length} in stock)
+                    </span>
+                  </div>
+                  {itemSkus.length > 0 && (
+                    <button
+                      onClick={() => handleCopySkus(itemSkus)}
+                      className="text-[11px] font-semibold text-[#0B3B60] hover:text-[#43B02A] flex items-center gap-1 px-2 py-1 rounded bg-slate-100 hover:bg-slate-200/70 transition-colors"
+                      title="Copy all SKU IDs to clipboard"
+                    >
+                      {copiedSkus ? (
+                        <>
+                          <Check className="w-3.5 h-3.5 text-[#43B02A]" />
+                          <span className="text-[#43B02A]">Copied!</span>
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="w-3.5 h-3.5" />
+                          <span>Copy All</span>
+                        </>
+                      )}
+                    </button>
+                  )}
+                </div>
+
+                {itemSkus.length > 0 ? (
+                  <div className="bg-slate-50 border border-slate-200 rounded-xl p-2.5 max-h-52 overflow-y-auto space-y-1.5 font-mono text-xs">
+                    {itemSkus.map((skuId, idx) => (
+                      <div
+                        key={idx}
+                        className="flex items-center justify-between py-1.5 px-3 bg-white hover:bg-slate-100/80 rounded-lg border border-slate-200 transition-colors shadow-2xs"
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="w-1.5 h-1.5 rounded-full bg-[#43B02A] shrink-0"></span>
+                          <span className="font-bold text-slate-800 tracking-wide">
+                            SKU: {skuId}
+                          </span>
+                        </div>
+                        <span className="text-[10px] font-sans font-semibold text-slate-500 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-md">
+                          Unit #{idx + 1}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="p-4 bg-amber-50/70 border border-amber-200/70 rounded-xl text-center space-y-1">
+                    <p className="text-xs font-bold text-amber-800">0 Units in Stock (Out of Stock)</p>
+                    <p className="text-[11px] text-amber-600">
+                      All individual unit SKUs have been sold or removed from inventory.
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
+                <span className="text-[11px] text-slate-400">
+                  {itemSkus.length > 0 ? 'Randomly deducted unit-by-unit during POS checkout' : 'Restock product to generate fresh unit IDs'}
                 </span>
+                <button
+                  onClick={() => setViewProduct(null)}
+                  className="btn-glass text-xs py-1.5 px-3.5"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  <span>Close</span>
+                </button>
               </div>
-
-              <div className="grid grid-cols-2 gap-3 pt-2">
-                <div className="p-3 rounded-lg border border-slate-200">
-                  <span className="text-xs text-slate-400 block">Selling Price</span>
-                  <span className="text-base font-bold text-[#0B3B60]">
-                    LKR {Number(viewProduct.sellingPrice || 0).toFixed(2)}
-                  </span>
-                </div>
-
-                <div className="p-3 rounded-lg border border-slate-200">
-                  <span className="text-xs text-slate-400 block">Current Stock</span>
-                  <span className="text-base font-bold text-slate-800">
-                    {viewProduct.stock} units
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div className="pt-3 border-t border-slate-100 flex justify-end">
-              <button
-                onClick={() => setViewProduct(null)}
-                className="btn-glass"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                <span>Back to Products</span>
-              </button>
             </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
     </div>
   );
 }

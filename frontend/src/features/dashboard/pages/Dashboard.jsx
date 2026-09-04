@@ -103,13 +103,13 @@ export default function Dashboard() {
       <QuickActions />
 
       {/* 3. Top Summary Cards (6 KPIs) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
         {/* Card 1: Today's Sales */}
         <StatCard
           title={summary?.todaySales?.title || "Today's Sales"}
-          value={summary?.todaySales?.formatted || "LKR 48,250.00"}
-          change={summary?.todaySales?.change || "+14.2%"}
-          comparison={summary?.todaySales?.comparison || "vs yesterday"}
+          value={summary?.todaySales?.formatted || "LKR 0.00"}
+          change={summary?.todaySales?.change || "0 orders"}
+          comparison={summary?.todaySales?.comparison || "recorded"}
           isPositive={summary?.todaySales?.isPositive ?? true}
           icon={DollarSign}
           iconBg="bg-[#43B02A]/10"
@@ -120,9 +120,9 @@ export default function Dashboard() {
         {/* Card 2: Today's Profit */}
         <StatCard
           title={summary?.todayProfit?.title || "Today's Profit"}
-          value={summary?.todayProfit?.formatted || "LKR 16,840.00"}
-          change={summary?.todayProfit?.change || "+8.6%"}
-          comparison={summary?.todayProfit?.comparison || "vs yesterday"}
+          value={summary?.todayProfit?.formatted || "LKR 0.00"}
+          change={summary?.todayProfit?.change || "Net margin"}
+          comparison={summary?.todayProfit?.comparison || "operational"}
           isPositive={summary?.todayProfit?.isPositive ?? true}
           icon={TrendingUp}
           iconBg="bg-[#0B3B60]/10"
@@ -132,10 +132,10 @@ export default function Dashboard() {
 
         {/* Card 3: Today's Transactions */}
         <StatCard
-          title={summary?.todayTransactions?.title || "Today's Transactions"}
-          value={summary?.todayTransactions?.formatted || "142 Orders"}
-          change={summary?.todayTransactions?.change || "+18 orders"}
-          comparison={summary?.todayTransactions?.comparison || "vs yesterday"}
+          title={summary?.todayTransactions?.title || "Today's Orders"}
+          value={summary?.todayTransactions?.formatted || "0 Orders"}
+          change={summary?.todayTransactions?.change || "0 receipts"}
+          comparison={summary?.todayTransactions?.comparison || "today"}
           isPositive={summary?.todayTransactions?.isPositive ?? true}
           icon={ShoppingCart}
           iconBg="bg-[#0B3B60]/10"
@@ -146,9 +146,9 @@ export default function Dashboard() {
         {/* Card 4: Total Products */}
         <StatCard
           title={summary?.totalProducts?.title || "Total Products"}
-          value={summary?.totalProducts?.formatted || "386 SKUs"}
-          change={summary?.totalProducts?.change || "+4 new"}
-          comparison={summary?.totalProducts?.comparison || "catalog items"}
+          value={summary?.totalProducts?.formatted || "0 SKUs"}
+          change={summary?.totalProducts?.change || "0 items"}
+          comparison={summary?.totalProducts?.comparison || "in catalog"}
           isPositive={summary?.totalProducts?.isPositive ?? true}
           icon={Package}
           iconBg="bg-indigo-50"
@@ -158,23 +158,23 @@ export default function Dashboard() {
 
         {/* Card 5: Low Stock Items */}
         <StatCard
-          title={summary?.lowStockItems?.title || "Low Stock Items"}
-          value={summary?.lowStockItems?.formatted || "7 Items"}
-          change={summary?.lowStockItems?.change || "3 critical"}
-          comparison={summary?.lowStockItems?.comparison || "requires restock"}
-          isPositive={summary?.lowStockItems?.isPositive ?? false}
+          title={summary?.lowStockItems?.title || "Low Stock"}
+          value={summary?.lowStockItems?.formatted || "0 Items"}
+          change={summary?.lowStockItems?.change || "0 critical"}
+          comparison={summary?.lowStockItems?.comparison || "stock ≤ 5"}
+          isPositive={summary?.lowStockItems?.isPositive ?? true}
           icon={AlertTriangle}
-          iconBg="bg-amber-100"
-          iconColor="text-amber-700"
+          iconBg="bg-amber-50"
+          iconColor="text-amber-600"
           loading={loading}
         />
 
         {/* Card 6: Total Customers */}
         <StatCard
-          title={summary?.totalCustomers?.title || "Total Customers"}
-          value={summary?.totalCustomers?.formatted || "1,248 Students"}
-          change={summary?.totalCustomers?.change || "+24 new"}
-          comparison={summary?.totalCustomers?.comparison || "this month"}
+          title={summary?.totalCustomers?.title || "Customers"}
+          value={summary?.totalCustomers?.formatted || "0 Students"}
+          change={summary?.totalCustomers?.change || "0 profiles"}
+          comparison={summary?.totalCustomers?.comparison || "registered"}
           isPositive={summary?.totalCustomers?.isPositive ?? true}
           icon={Users}
           iconBg="bg-sky-50"

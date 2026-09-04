@@ -32,8 +32,8 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 // Body parsers
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '25mb' }));
+app.use(express.urlencoded({ extended: true, limit: '25mb' }));
 
 // Direct health check endpoint: GET /api/health
 app.get('/api/health', healthController.checkHealth);
